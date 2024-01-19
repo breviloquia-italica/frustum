@@ -11,6 +11,7 @@ const MAP_URL = {
 };
 
 import * as d3 from "d3";
+import { buildTimeFilter, buildWordFilter } from "../utils";
 
 export default class extends Controller {
   static targets = ["container"];
@@ -83,15 +84,9 @@ export default class extends Controller {
   }: CustomEvent<{
     selectedWords: string[];
   }>) {
-    let wordFilter: (d: { word: string }) => boolean;
-    if (selectedWords.length < 1) {
-      wordFilter = () => true;
-    } else {
-      const selectedSet = new Set(selectedWords);
-      wordFilter = (d) => selectedSet.has(d.word);
-    }
+    const filter = buildWordFilter(selectedWords);
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      return wordFilter(d) ? "visible" : "hidden";
+      return filter(d) ? "visible" : "hidden";
     });
   }
 
@@ -100,17 +95,9 @@ export default class extends Controller {
   }: CustomEvent<{
     timespan: [Date, Date] | null;
   }>) {
-    let timeFilter: (d: { epoch: number }) => boolean;
-    if (timespan === null) {
-      timeFilter = () => true;
-    } else {
-      // NOTE: comparing millis is much faster
-      const s = timespan[0].getTime();
-      const t = timespan[1].getTime();
-      timeFilter = (d) => d.epoch >= s && d.epoch <= t;
-    }
+    const filter = buildTimeFilter(timespan);
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      return timeFilter(d) ? "visible" : "hidden";
+      return filter(d) ? "visible" : "hidden";
     });
   }
 }

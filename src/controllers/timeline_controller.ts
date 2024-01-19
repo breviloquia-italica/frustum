@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
+import { buildWordFilter } from "../utils";
 
 export default class extends Controller {
   static targets = ["fileInput", "sliderContainer"];
@@ -122,16 +123,10 @@ export default class extends Controller {
   }: CustomEvent<{
     selectedWords: string[];
   }>) {
-    let wordFilter: (d: { word: string }) => boolean;
-    if (selectedWords.length < 1) {
-      wordFilter = () => true;
-    } else {
-      const selectedSet = new Set(selectedWords);
-      wordFilter = (d) => selectedSet.has(d.word);
-    }
+    const filter = buildWordFilter(selectedWords);
 
     const countByDay = d3.rollup(
-      this.facet.filter(({ word }) => wordFilter({ word })),
+      this.facet.filter(({ word }) => filter({ word })),
       (v) => v.length,
       (d) => d.day
     );

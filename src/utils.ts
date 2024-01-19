@@ -1,0 +1,23 @@
+export const buildWordFilter = function (wordlist: string[] | null) {
+  let wordFilter: (d: { word: string }) => boolean;
+  if (wordlist === null || wordlist.length < 1) {
+    wordFilter = () => true;
+  } else {
+    const selectedSet = new Set(wordlist);
+    wordFilter = (d) => selectedSet.has(d.word);
+  }
+  return wordFilter;
+};
+
+export const buildTimeFilter = function (timespan: [Date, Date] | null) {
+  let timeFilter: (d: { epoch: number }) => boolean;
+  if (timespan === null) {
+    timeFilter = () => true;
+  } else {
+    // NOTE: comparing millis is much faster
+    const s = timespan[0].getTime();
+    const t = timespan[1].getTime();
+    timeFilter = (d) => d.epoch >= s && d.epoch <= t;
+  }
+  return timeFilter;
+};
