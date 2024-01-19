@@ -3434,10 +3434,10 @@
   "resolved" "https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.7.tgz"
   "version" "3.0.7"
 
-"simpleheat@^0.4.0":
-  "integrity" "sha512-tdg3I1NvzMdPKscWBrHbF0LBf+VWuBBazzGUPtFJjG5Q12VQX6gPY8jLy9hx5CbgAIVc5nfnePwJvAYK6z1rAA=="
-  "resolved" "https://registry.npmjs.org/simpleheat/-/simpleheat-0.4.0.tgz"
-  "version" "0.4.0"
+"simpleheat-ts@^1.0.1":
+  "integrity" "sha512-o5BOmyvVkcHK4O6hCgq/qQwxkdgfg1ePHcXoYN5T/xJGBgA8lP1qwgOoaa/7lXrxa0oeunXVHXaiaI/fUwtUuw=="
+  "resolved" "https://registry.npmjs.org/simpleheat-ts/-/simpleheat-ts-1.0.1.tgz"
+  "version" "1.0.1"
 
 "sisteransi@^1.0.5":
   "integrity" "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="

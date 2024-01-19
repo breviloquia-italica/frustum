@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 import { assert } from "console";
 
-import * as simpleheat from "simpleheat";
+import { SimpleHeat } from "simpleheat-ts";
 
 const MAP_URL = {
   municipalities:
@@ -39,13 +39,16 @@ export default class extends Controller {
   wordFilter = buildWordFilter(null);
 
   async connect() {
-    this.heat = simpleheat(this.heatCanvasTarget);
+    this.heat = new SimpleHeat(
+      document.createElement("canvas"),
+      document.createElement("canvas")
+    );
     this.heatCanvasTarget.style.width = "100%";
     this.heatCanvasTarget.style.height = "100%";
     // ...then set the internal size to match
     this.heatCanvasTarget.width = this.heatCanvasTarget.offsetWidth;
     this.heatCanvasTarget.height = this.heatCanvasTarget.offsetHeight;
-    this.heat.resize();
+    // this.heat.resize();
     this.heat.radius(3, 6);
 
     const bb = (await d3.json<d3.ExtendedFeatureCollection>(MAP_URL.regions))!;
@@ -150,7 +153,7 @@ export default class extends Controller {
       .map(({ x, y }) => [x, y, 1]);
     this.heat.data(data);
     // this.heat.max(12000);
-    this.heat.draw(0.05);
+    this.heat.draw(this.heatCanvasTarget.getContext("2d"), 0.05);
   }
 
   throttle(mainFunction: any, delay: number) {

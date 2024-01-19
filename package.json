@@ -53,6 +53,6 @@
   "dependencies": {
     "@hotwired/stimulus": "^3.2.1",
     "d3": "^7.8.5",
-    "simpleheat": "^0.4.0"
+    "simpleheat-ts": "^1.0.1"
   }
 }
