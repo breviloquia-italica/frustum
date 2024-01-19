@@ -94,9 +94,11 @@ export default class extends Controller {
   }: CustomEvent<{
     selectedPeriod: [Date, Date];
   }>) {
+    // NOTE: comparing millis is much faster
+    const s = selectedPeriod[0].getTime();
+    const t = selectedPeriod[1].getTime();
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      const visible =
-        d.timestamp >= selectedPeriod[0] && d.timestamp <= selectedPeriod[1];
+      const visible = d.epoch >= s && d.epoch <= t;
       return visible ? "visible" : "hidden";
     });
   }

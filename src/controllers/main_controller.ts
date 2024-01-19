@@ -14,6 +14,7 @@ export default class extends Controller {
         latitude: +latitude,
         longitude: +longitude,
         word: word,
+        epoch: new Date(timestamp).getTime(),
       })).then((data) => {
         this.dispatch("datasetChanged", {
           detail: { data },
