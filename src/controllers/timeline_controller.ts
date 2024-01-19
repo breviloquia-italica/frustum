@@ -81,7 +81,7 @@ export default class extends Controller {
       .attr("transform", `translate(0,${this.height})`)
       .call(d3.axisBottom(this.xScale));
 
-    this.svg.append("g").call(d3.axisLeft(this.yScale));
+    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
 
     this.svg
       .append("g")
@@ -136,6 +136,14 @@ export default class extends Controller {
       date,
       count,
     }));
+
+    this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
+      number,
+      number
+    ]);
+
+    this.svg.select("#yAxis").remove();
+    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
 
     this.svg
       .select("#bars")
