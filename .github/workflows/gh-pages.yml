@@ -16,10 +16,9 @@ jobs:
         with:
           node-version: 18
           cache: "yarn"
-      - run: yarn install
-      # - run: yarn docs
+      - run: npm install
       # - run: touch docs/.nojekyll
-      - run: yarn build --base=/frustum/
+      - run: npm run build --base=/frustum/
       - run: touch dist/.nojekyll
 
       - uses: actions/upload-pages-artifact@v1
