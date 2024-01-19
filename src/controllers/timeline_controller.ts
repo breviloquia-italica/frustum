@@ -15,6 +15,8 @@ export default class extends Controller {
   width!: number;
   height!: number;
 
+  facet: { word: string; day: string }[] = [];
+
   connect(): void {
     this.margin = { top: 8, right: 16, bottom: 16, left: 32 };
     this.width =
@@ -51,8 +53,10 @@ export default class extends Controller {
       word: string;
     }[];
   }>) {
+    this.facet = data.map(({ word, day }) => ({ word, day }));
+
     const countByDay = d3.rollup(
-      data,
+      this.facet,
       (v) => v.length,
       (d) => d.day
     );
@@ -79,6 +83,8 @@ export default class extends Controller {
     this.svg.append("g").call(d3.axisLeft(this.yScale));
 
     this.svg
+      .append("g")
+      .attr("id", "bars")
       .selectAll("rect")
       .data(histogramData)
       .join("rect")
@@ -95,7 +101,7 @@ export default class extends Controller {
       ])
       .on("start brush end", this.handleBrush.bind(this));
 
-    this.svg.append("g").call(brush).call(brush.move, null); // this.xScale.range() as any);
+    this.svg.append("g").attr("id", "brush").call(brush).call(brush.move, null); // this.xScale.range() as any);
   }
 
   handleBrush(event: d3.D3BrushEvent<unknown>) {
@@ -109,5 +115,45 @@ export default class extends Controller {
     this.dispatch("timespanChanged", {
       detail: { timespan },
     });
+  }
+
+  updateWordlist({
+    detail: { selectedWords },
+  }: CustomEvent<{
+    selectedWords: string[];
+  }>) {
+    let wordFilter: (d: { word: string }) => boolean;
+    if (selectedWords.length < 1) {
+      wordFilter = () => true;
+    } else {
+      const selectedSet = new Set(selectedWords);
+      wordFilter = (d) => selectedSet.has(d.word);
+    }
+
+    const countByDay = d3.rollup(
+      this.facet.filter(({ word }) => wordFilter({ word })),
+      (v) => v.length,
+      (d) => d.day
+    );
+
+    // Convert the Map to an array of objects for easier processing
+    const histogramData = Array.from(countByDay, ([date, count]) => ({
+      date,
+      count,
+    }));
+
+    this.svg
+      .select("#bars")
+      .selectAll("rect")
+      .data(histogramData)
+      .join("rect")
+      .attr("width", 2) // bandwidth?
+      .attr("height", (d) => this.height - this.yScale(d.count))
+      .attr("y", (d) => this.yScale(d.count))
+      .attr("x", (d) => this.xScale(new Date(d.date)));
+
+    //this.dots.selectAll("circle").attr("visibility", (d: any) => {
+    //  return wordFilter(d) ? "visible" : "hidden";
+    //});
   }
 }
