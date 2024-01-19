@@ -16,12 +16,15 @@ export default class extends Controller {
   height!: number;
 
   connect(): void {
-    this.margin = { top: 10, right: 30, bottom: 30, left: 40 };
+    this.margin = { top: 8, right: 16, bottom: 16, left: 32 };
     this.width =
       this.sliderContainerTarget.clientWidth -
       this.margin.left -
       this.margin.right;
-    this.height = 100 - this.margin.top - this.margin.bottom;
+    this.height =
+      this.sliderContainerTarget.clientHeight -
+      this.margin.top -
+      this.margin.bottom;
 
     // Append the svg object to the container
     this.svg = d3
@@ -87,20 +90,15 @@ export default class extends Controller {
     const brush = d3
       .brushX()
       .extent([
-        [this.margin.left, 0.5],
-        [
-          this.width - this.margin.right,
-          this.height - this.margin.bottom + 0.5,
-        ],
+        [0, 0],
+        [this.width, this.height],
       ])
       .on("start brush end", this.handleBrush.bind(this));
-
-    const defaultSelection = [this.xScale.range()[0], this.xScale.range()[1]];
 
     this.svg
       .append("g")
       .call(brush)
-      .call(brush.move, defaultSelection as any);
+      .call(brush.move, this.xScale.range() as any);
   }
 
   handleBrush(event: d3.D3BrushEvent<any>) {
