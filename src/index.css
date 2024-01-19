@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* :root {
+    color-scheme: light dark;
+
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+  }
+
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      color: #213547;
+      background-color: #ffffff;
+    }
+  } */
+}
+
+@layer components {
+  main {
+    @apply grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 3fr 1fr;
+  }
+
+  select {
+    font-family: "Linux Libertine O", sans-serif;
+    /* font-family: 'Linux Libertine Display O', sans-serif; */
+    /* font-family: 'Linux Libertine Initials O', sans-serif; */
+    /* font-family: 'Linux Libertine Mono O', sans-serif; */
+  }
+}
