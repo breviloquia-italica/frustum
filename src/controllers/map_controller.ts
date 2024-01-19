@@ -20,6 +20,9 @@ export default class extends Controller {
   projection!: d3.GeoProjection;
   dots!: d3.Selection<SVGGElement, unknown, null, undefined>;
 
+  timeFilter = buildTimeFilter(null);
+  wordFilter = buildWordFilter(null);
+
   async connect() {
     const bb = (await d3.json<d3.ExtendedFeatureCollection>(MAP_URL.regions))!;
     this.projection = d3.geoEqualEarth();
@@ -79,25 +82,28 @@ export default class extends Controller {
       .attr("fill", "red"); // Color of the dots
   }
 
-  updateFilter({
+  updateWordlist({
     detail: { wordlist },
   }: CustomEvent<{
     wordlist: string[];
   }>) {
-    const filter = buildWordFilter(wordlist);
-    this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      return filter(d) ? "visible" : "hidden";
-    });
+    this.wordFilter = buildWordFilter(wordlist);
+    this.applyFilter();
   }
 
-  updateTimeFilter({
+  updateTimespan({
     detail: { timespan },
   }: CustomEvent<{
     timespan: [Date, Date] | null;
   }>) {
-    const filter = buildTimeFilter(timespan);
+    this.timeFilter = buildTimeFilter(timespan);
+    this.applyFilter();
+  }
+
+  applyFilter() {
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      return filter(d) ? "visible" : "hidden";
+      const visible = this.wordFilter(d) && this.timeFilter(d);
+      return visible ? "visible" : "hidden";
     });
   }
 }

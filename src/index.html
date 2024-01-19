@@ -16,9 +16,9 @@
 main:datasetChanged->lexicon#reloadDataset
 main:datasetChanged->timeline#reloadDataset
 main:datasetChanged->map#reloadDataset
-lexicon:wordlistChanged->map#updateFilter
 lexicon:wordlistChanged->timeline#updateWordlist
-timeline:timespanChanged->map#updateTimeFilter
+lexicon:wordlistChanged->map#updateWordlist
+timeline:timespanChanged->map#updateTimespan
     ">
     <section class="bg-red-50 row-span-2 flex flex-col">
       <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
