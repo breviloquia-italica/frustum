@@ -7,11 +7,11 @@ export default class extends Controller {
 
   async connect() {
     this.selectTarget.addEventListener("change", () => {
-      const selectedWords = Array.from(this.selectTarget.selectedOptions).map(
+      const wordlist = Array.from(this.selectTarget.selectedOptions).map(
         (option) => option.value
       );
       this.dispatch("wordlistChanged", {
-        detail: { selectedWords },
+        detail: { wordlist },
       });
     });
   }

@@ -119,11 +119,11 @@ export default class extends Controller {
   }
 
   updateWordlist({
-    detail: { selectedWords },
+    detail: { wordlist },
   }: CustomEvent<{
-    selectedWords: string[];
+    wordlist: string[];
   }>) {
-    const filter = buildWordFilter(selectedWords);
+    const filter = buildWordFilter(wordlist);
 
     const countByDay = d3.rollup(
       this.facet.filter(({ word }) => filter({ word })),

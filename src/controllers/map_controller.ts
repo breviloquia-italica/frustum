@@ -80,11 +80,11 @@ export default class extends Controller {
   }
 
   updateFilter({
-    detail: { selectedWords },
+    detail: { wordlist },
   }: CustomEvent<{
-    selectedWords: string[];
+    wordlist: string[];
   }>) {
-    const filter = buildWordFilter(selectedWords);
+    const filter = buildWordFilter(wordlist);
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
       return filter(d) ? "visible" : "hidden";
     });
