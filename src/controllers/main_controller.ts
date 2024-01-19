@@ -6,24 +6,24 @@ export default class extends Controller {
   declare readonly fileInputTarget: HTMLInputElement;
 
   connect(): void {
-    setTimeout(() => {
-      // TODO: remove sleep
-      d3.csv(
-        "https://gist.github.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/3d57c65f966ade9dfc1be5ed94f88c2afe639254/frustum-demo.csv",
-        ({ timestamp, latitude, longitude, word }) => ({
-          timestamp: new Date(timestamp),
-          day: d3.timeFormat("%Y-%m-%d")(new Date(timestamp)),
-          latitude: +latitude,
-          longitude: +longitude,
-          word: word,
-          epoch: new Date(timestamp).getTime(),
-        })
-      ).then((data) => {
-        this.dispatch("datasetChanged", {
-          detail: { data },
-        });
-      });
-    }, 500);
+    //setTimeout(() => {
+    //  // TODO: remove sleep
+    //  d3.csv(
+    //    "/frustum-demo.csv",
+    //    ({ timestamp, latitude, longitude, word }) => ({
+    //      timestamp: new Date(timestamp),
+    //      day: d3.timeFormat("%Y-%m-%d")(new Date(timestamp)),
+    //      latitude: +latitude,
+    //      longitude: +longitude,
+    //      word: word,
+    //      epoch: new Date(timestamp).getTime(),
+    //    })
+    //  ).then((data) => {
+    //    this.dispatch("datasetChanged", {
+    //      detail: { data },
+    //    });
+    //  });
+    //}, 500);
   }
 
   async changeDataset(event: Event) {
@@ -47,14 +47,15 @@ export default class extends Controller {
       csv,
       ({ timestamp, latitude, longitude, word }) => ({
         timestamp: new Date(timestamp),
+        day: d3.timeFormat("%Y-%m-%d")(new Date(timestamp)),
         latitude: +latitude,
         longitude: +longitude,
         word: word,
+        epoch: new Date(timestamp).getTime(),
       })
     );
-    const latLongPairs = data.map((d) => [d.longitude, d.latitude]);
-    this.dispatch("updateMap", {
-      detail: { latLongPairs },
+    this.dispatch("datasetChanged", {
+      detail: { data },
     });
   }
 }
