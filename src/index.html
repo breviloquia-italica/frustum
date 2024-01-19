@@ -17,7 +17,8 @@ main:datasetChanged->wordlist#reloadDataset
 main:datasetChanged->timeline#reloadDataset
 main:datasetChanged->map#reloadDataset
 wordlist:selectedWordsChanged->map#updateFilter
-timeline:selectedPeriodChanged->map#updateTimeFilter
+wordlist:selectedWordsChanged->timeline#updateWordlist
+timeline:timespanChanged->map#updateTimeFilter
     ">
     <section class="bg-red-50 row-span-2 flex flex-col">
       <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />

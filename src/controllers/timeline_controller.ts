@@ -95,20 +95,19 @@ export default class extends Controller {
       ])
       .on("start brush end", this.handleBrush.bind(this));
 
-    this.svg
-      .append("g")
-      .call(brush)
-      .call(brush.move, this.xScale.range() as any);
+    this.svg.append("g").call(brush).call(brush.move, null); // this.xScale.range() as any);
   }
 
-  handleBrush(event: d3.D3BrushEvent<any>) {
-    const selectedPeriod: [Date, Date] = [
-      this.xScale.invert(event.selection![0] as d3.NumberValue),
-      this.xScale.invert(event.selection![1] as d3.NumberValue),
-    ];
+  handleBrush(event: d3.D3BrushEvent<unknown>) {
+    const timespan: [Date, Date] | null = event.selection
+      ? [
+          this.xScale.invert(event.selection[0] as d3.NumberValue),
+          this.xScale.invert(event.selection[1] as d3.NumberValue),
+        ]
+      : null;
 
-    this.dispatch("selectedPeriodChanged", {
-      detail: { selectedPeriod },
+    this.dispatch("timespanChanged", {
+      detail: { timespan },
     });
   }
 }

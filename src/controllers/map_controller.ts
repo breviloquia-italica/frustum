@@ -90,16 +90,21 @@ export default class extends Controller {
   }
 
   updateTimeFilter({
-    detail: { selectedPeriod },
+    detail: { timespan },
   }: CustomEvent<{
-    selectedPeriod: [Date, Date];
+    timespan: [Date, Date] | null;
   }>) {
-    // NOTE: comparing millis is much faster
-    const s = selectedPeriod[0].getTime();
-    const t = selectedPeriod[1].getTime();
+    let timeFilter: (d: { epoch: number }) => boolean;
+    if (timespan === null) {
+      timeFilter = () => true;
+    } else {
+      // NOTE: comparing millis is much faster
+      const s = timespan[0].getTime();
+      const t = timespan[1].getTime();
+      timeFilter = (d) => d.epoch >= s && d.epoch <= t;
+    }
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      const visible = d.epoch >= s && d.epoch <= t;
-      return visible ? "visible" : "hidden";
+      return timeFilter(d) ? "visible" : "hidden";
     });
   }
 }
