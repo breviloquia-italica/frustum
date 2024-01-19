@@ -10,7 +10,7 @@ export default class extends Controller {
       const selectedWords = Array.from(this.selectTarget.selectedOptions).map(
         (option) => option.value
       );
-      this.dispatch("selectedWordsChanged", {
+      this.dispatch("wordlistChanged", {
         detail: { selectedWords },
       });
     });

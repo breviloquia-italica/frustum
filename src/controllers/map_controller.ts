@@ -83,9 +83,15 @@ export default class extends Controller {
   }: CustomEvent<{
     selectedWords: string[];
   }>) {
-    const selectedSet = new Set(selectedWords);
+    let wordFilter: (d: { word: string }) => boolean;
+    if (selectedWords.length < 1) {
+      wordFilter = () => true;
+    } else {
+      const selectedSet = new Set(selectedWords);
+      wordFilter = (d) => selectedSet.has(d.word);
+    }
     this.dots.selectAll("circle").attr("visibility", (d: any) => {
-      return selectedSet.has(d.word) ? "visible" : "hidden";
+      return wordFilter(d) ? "visible" : "hidden";
     });
   }
 

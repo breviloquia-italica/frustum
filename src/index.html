@@ -12,17 +12,17 @@
 
 <body class="flex flex-col w-screen h-screen overflow-hidden">
 
-  <main class="bg-slate-50 h-full" data-controller="main wordlist timeline map" data-action="
-main:datasetChanged->wordlist#reloadDataset
+  <main class="bg-slate-50 h-full" data-controller="main lexicon timeline map" data-action="
+main:datasetChanged->lexicon#reloadDataset
 main:datasetChanged->timeline#reloadDataset
 main:datasetChanged->map#reloadDataset
-wordlist:selectedWordsChanged->map#updateFilter
-wordlist:selectedWordsChanged->timeline#updateWordlist
+lexicon:wordlistChanged->map#updateFilter
+lexicon:wordlistChanged->timeline#updateWordlist
 timeline:timespanChanged->map#updateTimeFilter
     ">
     <section class="bg-red-50 row-span-2 flex flex-col">
       <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
-      <select multiple data-wordlist-target="select" class="w-full h-full"></select>
+      <select multiple data-lexicon-target="select" class="w-full h-full"></select>
     </section>
     <section class="bg-green-50">
       <div class="w-full h-full" data-map-target="container"></div>
