@@ -172,7 +172,7 @@ export default class extends Controller {
         },
         (exit: any) => {
           return exit.remove();
-        }
+        },
       );
   }
 }

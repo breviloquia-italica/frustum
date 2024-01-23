@@ -8,7 +8,7 @@ export default class extends Controller {
   async connect() {
     this.selectTarget.addEventListener("change", () => {
       const wordlist = Array.from(this.selectTarget.selectedOptions).map(
-        (option) => option.value
+        (option) => option.value,
       );
       this.dispatch("wordlistChanged", {
         detail: { wordlist },
@@ -32,13 +32,13 @@ export default class extends Controller {
     const countByWord = d3.rollup(
       data,
       (v) => v.length,
-      (d) => d.word
+      (d) => d.word,
     );
 
     this.selectTarget.innerHTML = "";
     // Sort the countByWord map by count in descending order
     const sortedWords = Array.from(countByWord.entries()).sort(
-      (a, b) => b[1] - a[1]
+      (a, b) => b[1] - a[1],
     );
 
     // Create and append options to the selectTarget

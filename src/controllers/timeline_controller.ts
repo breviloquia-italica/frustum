@@ -59,7 +59,7 @@ export default class extends Controller {
     const countByDay = d3.rollup(
       this.facet,
       (v) => v.length,
-      (d) => d.day
+      (d) => d.day,
     );
 
     // Convert the Map to an array of objects for easier processing
@@ -73,7 +73,7 @@ export default class extends Controller {
     // TODO: y changes when wordlist changes
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
       number,
-      number
+      number,
     ]);
 
     this.svg
@@ -128,7 +128,7 @@ export default class extends Controller {
     const countByDay = d3.rollup(
       this.facet.filter(({ word }) => filter({ word })),
       (v) => v.length,
-      (d) => d.day
+      (d) => d.day,
     );
 
     // Convert the Map to an array of objects for easier processing
@@ -139,7 +139,7 @@ export default class extends Controller {
 
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
       number,
-      number
+      number,
     ]);
 
     this.svg.select("#yAxis").remove();
