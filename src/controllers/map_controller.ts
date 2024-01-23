@@ -60,7 +60,33 @@ export default class extends Controller {
       .append("path")
       .attr("d", geoGenerator);
 
+    this.svg.append("g").attr("id", "hexbins");
     this.hexbin = hexbin().radius(6).extent(extent);
+
+    const brush = d3
+      .brush()
+      .extent(extent)
+      .on("start brush end", this.handleBrush.bind(this));
+
+    this.svg
+      .append("g")
+      .attr("id", "mapBrush")
+      .call(brush)
+      .call(brush.move, null);
+  }
+
+  handleBrush(event: d3.D3BrushEvent<unknown>) {
+    const landarea: [[number, number], [number, number]] | null =
+      event.selection
+        ? [
+            this.projection.invert!(event.selection[0] as [number, number])!,
+            this.projection.invert!(event.selection[1] as [number, number])!,
+          ]
+        : null;
+
+    this.dispatch("landareaChanged", {
+      detail: { landarea },
+    });
   }
 
   disconnect() {}
@@ -84,8 +110,6 @@ export default class extends Controller {
       return { ...d, x, y };
     });
     this.redrawheat();
-
-    this.svg.append("g").attr("id", "hexbins");
   }
 
   updateWordlist({
