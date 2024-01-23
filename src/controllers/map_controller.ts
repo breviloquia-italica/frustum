@@ -1,8 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import { assert } from "console";
 
-import { SimpleHeat } from "simpleheat-ts";
-
 const MAP_URL = {
   municipalities:
     "https://raw.githubusercontent.com/openpolis/geojson-italy/master/geojson/limits_IT_municipalities.geojson",
@@ -17,12 +15,10 @@ import { Hexbin, hexbin } from "d3-hexbin";
 import { buildTimeFilter, buildWordFilter } from "../utils";
 
 export default class extends Controller {
-  static targets = ["container", "heatCanvas"];
+  static targets = ["container"];
   declare readonly containerTarget: HTMLDivElement;
-  declare readonly heatCanvasTarget: HTMLCanvasElement;
 
   projection!: d3.GeoProjection;
-  heat!: any;
   hexbin!: Hexbin<[number, number]>;
   svg!: any;
 
@@ -41,18 +37,6 @@ export default class extends Controller {
   wordFilter = buildWordFilter(null);
 
   async connect() {
-    this.heat = new SimpleHeat(
-      document.createElement("canvas"),
-      document.createElement("canvas")
-    );
-    this.heatCanvasTarget.style.width = "100%";
-    this.heatCanvasTarget.style.height = "100%";
-    // ...then set the internal size to match
-    this.heatCanvasTarget.width = this.heatCanvasTarget.offsetWidth;
-    this.heatCanvasTarget.height = this.heatCanvasTarget.offsetHeight;
-    // this.heat.resize();
-    this.heat.radius(3, 6);
-
     const extent: [[number, number], [number, number]] = [
       [0, 0],
       [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
@@ -100,7 +84,6 @@ export default class extends Controller {
       return { ...d, x, y };
     });
     const maximum = d3.max(bins);
-    this.heat.max(maximum);
     this.redrawheat();
 
     //console.log(this.hexbin(this.dataset.map((d) => [d.x, d.y])));
@@ -216,16 +199,6 @@ export default class extends Controller {
           return exit.remove();
         }
       );
-    return;
-    this.heat.clear();
-
-    const data = this.dataset
-      .filter(this.wordFilter)
-      .filter(this.timeFilter)
-      .map(({ x, y }) => [x, y, 1]);
-    this.heat.data(data);
-    // this.heat.max(12000);
-    this.heat.draw(this.heatCanvasTarget.getContext("2d"), 0.05);
   }
 
   throttle(mainFunction: any, delay: number) {
