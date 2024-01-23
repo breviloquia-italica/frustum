@@ -23,7 +23,7 @@
     "ts-node": "ts-node",
     "clean": "rm -rf dist build package",
     "all": "yarn clean && yarn types && yarn build",
-    "types": "tsc --project tsconfig.web.json",
+    "types": "tsc",
     "build": "vite build",
     "serve": "vite serve",
     "watch": "vite build --watch"
