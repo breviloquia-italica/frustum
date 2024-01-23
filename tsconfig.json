@@ -13,6 +13,7 @@
     "strict": true,
     "types": ["node"],
     "isolatedModules": true,
+    "moduleResolution": "Node10",
     "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "noEmit": true,
