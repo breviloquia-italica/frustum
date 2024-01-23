@@ -22,7 +22,6 @@ export default class extends Controller {
   declare readonly heatCanvasTarget: HTMLCanvasElement;
 
   projection!: d3.GeoProjection;
-  dots!: d3.Selection<SVGGElement, unknown, null, undefined>;
   heat!: any;
   hexbin!: Hexbin<[number, number]>;
   svg!: any;
@@ -76,11 +75,6 @@ export default class extends Controller {
       .enter()
       .append("path")
       .attr("d", geoGenerator);
-    this.dots = d3
-      .select(this.containerTarget)
-      .select("svg")
-      .append("g")
-      .attr("class", "dots");
 
     this.hexbin = hexbin().radius(6).extent(extent);
   }
@@ -116,16 +110,6 @@ export default class extends Controller {
       .range(["transparent", "#69b3a2"]);
 
     this.svg.append("g").attr("id", "hexbins");
-    //this.dots
-    //  .selectAll("circle")
-    //  .data(data)
-    //  .enter()
-    //  .append("circle")
-    //  .attr("cx", (d) => this.projection([d.longitude, d.latitude])![0])
-    //  .attr("cy", (d) => this.projection([d.longitude, d.latitude])![1])
-    //  .attr("r", 2) // Radius of the dots
-    //  .attr("opacity", 0.1)
-    //  .attr("fill", "red"); // Color of the dots
   }
 
   updateWordlist({
@@ -148,10 +132,6 @@ export default class extends Controller {
 
   applyFilter() {
     this.redrawheat();
-    // this.dots.selectAll("circle").attr("visibility", (d: any) => {
-    //   const visible = this.wordFilter(d) && this.timeFilter(d);
-    //   return visible ? "visible" : "hidden";
-    // });
   }
 
   redrawheat() {
