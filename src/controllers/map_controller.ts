@@ -151,24 +151,4 @@ export default class extends Controller {
         }
       );
   }
-
-  throttle(mainFunction: any, delay: number) {
-    let timerFlag: NodeJS.Timeout | null = null;
-
-    // Returning a throttled version
-    return (...args: any) => {
-      if (timerFlag === null) {
-        // If there is no timer currently running
-        mainFunction(...args); // Execute the main function
-        timerFlag = setTimeout(() => {
-          timerFlag = null;
-        }, delay);
-      }
-    };
-  }
-
-  throttledRedrawHeat = this.throttle(
-    this.redrawheat.bind(this),
-    8 //17 // 60fps
-  );
 }
