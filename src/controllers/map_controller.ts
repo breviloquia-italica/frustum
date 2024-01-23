@@ -13,6 +13,7 @@ const MAP_URL = {
 };
 
 import * as d3 from "d3";
+import { Hexbin, hexbin } from "d3-hexbin";
 import { buildTimeFilter, buildWordFilter } from "../utils";
 
 export default class extends Controller {
@@ -23,6 +24,8 @@ export default class extends Controller {
   projection!: d3.GeoProjection;
   dots!: d3.Selection<SVGGElement, unknown, null, undefined>;
   heat!: any;
+  hexbin!: Hexbin<[number, number]>;
+  svg!: any;
 
   dataset: {
     timestamp: Date;
@@ -61,12 +64,12 @@ export default class extends Controller {
       bb
     );
     const geoGenerator = d3.geoPath().projection(this.projection);
-    const svg = d3
+    this.svg = d3
       .select(this.containerTarget)
       .append("svg")
       .style("width", "100%")
       .style("height", "100%");
-    svg
+    this.svg
       .append("g")
       .selectAll("path")
       .data(bb.features)
@@ -81,6 +84,13 @@ export default class extends Controller {
       .select("svg")
       .append("g")
       .attr("class", "dots");
+
+    this.hexbin = hexbin()
+      .radius(6) // size of the bin in px
+      .extent([
+        [0, 0],
+        [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
+      ]);
   }
 
   disconnect() {}
@@ -106,6 +116,14 @@ export default class extends Controller {
     const maximum = d3.max(bins);
     this.heat.max(maximum);
     this.redrawheat();
+
+    //console.log(this.hexbin(this.dataset.map((d) => [d.x, d.y])));
+    const color = d3
+      .scaleLinear()
+      .domain([0, 600]) // Number of points in the bin?
+      .range(["transparent", "#69b3a2"]);
+
+    this.svg.append("g").attr("id", "hexbins");
     //this.dots
     //  .selectAll("circle")
     //  .data(data)
@@ -137,7 +155,7 @@ export default class extends Controller {
   }
 
   applyFilter() {
-    this.throttledRedrawHeat();
+    this.redrawheat();
     // this.dots.selectAll("circle").attr("visibility", (d: any) => {
     //   const visible = this.wordFilter(d) && this.timeFilter(d);
     //   return visible ? "visible" : "hidden";
@@ -145,6 +163,88 @@ export default class extends Controller {
   }
 
   redrawheat() {
+    const dee = this.dataset
+      .filter(this.wordFilter)
+      .filter(this.timeFilter)
+      .map(({ x, y }) => [x, y]);
+    const mx = Math.max(...this.hexbin(dee).map((h) => h.length), 0);
+    const color = d3
+      .scaleLinear()
+      .domain([0, mx]) // Number of points in the bin?
+      .range(["blue", "red"]);
+    //.domain([0, 0.33 * 100, 0.66 * 100, 1 * 100]) // Number of points in the bin?
+    //.range(["transparent", "blue", "lime", "red"]);
+
+    const densityData = d3
+      .contourDensity()
+      .x((d) => d[0])
+      .y((d) => d[1])
+      .size([
+        this.containerTarget.clientWidth,
+        this.containerTarget.clientHeight,
+      ])
+      .bandwidth(8)
+      .thresholds(64)(
+      this.dataset
+        .filter(this.wordFilter)
+        .filter(this.timeFilter)
+        .map(({ x, y }) => [x, y])
+    );
+
+    // this.svg
+    //   .select("#hexbins")
+    //   //.insert("g", "g")
+    //   .selectAll("path")
+    //   .data(densityData)
+    //   .join(
+    //     (enter: any) => {
+    //       return enter
+    //         .append("path")
+    //         .attr("d", d3.geoPath())
+    //         .attr("fill", (d: any) => color(d.value));
+    //     },
+    //     (update: any) => {
+    //       return update
+    //         .attr("d", d3.geoPath())
+    //         .attr("fill", (d: any) => color(d.value));
+    //     },
+    //     (exit: any) => {
+    //       return exit.remove();
+    //     }
+    //   );
+
+    //return;
+
+    this.svg
+      .select("#hexbins")
+      .selectAll("path")
+      .data(this.hexbin(dee))
+      .join(
+        (enter: any) => {
+          return enter
+            .append("path")
+            .attr("d", this.hexbin.hexagon())
+            .attr("transform", function (d: any) {
+              return "translate(" + d.x + "," + d.y + ")";
+            })
+            .attr("fill", function (d: any) {
+              return color(d.length);
+            });
+        },
+        (update: any) => {
+          return update
+            .attr("fill", function (d: any) {
+              return color(d.length);
+            })
+            .attr("transform", function (d: any) {
+              return "translate(" + d.x + "," + d.y + ")";
+            });
+        },
+        (exit: any) => {
+          return exit.remove();
+        }
+      );
+    return;
     this.heat.clear();
 
     const data = this.dataset
@@ -173,6 +273,6 @@ export default class extends Controller {
 
   throttledRedrawHeat = this.throttle(
     this.redrawheat.bind(this),
-    17 // 60fps
+    8 //17 // 60fps
   );
 }
