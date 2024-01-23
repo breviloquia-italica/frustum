@@ -83,14 +83,7 @@ export default class extends Controller {
       bins[Math.floor(x / 6) + Math.floor(y / 6) * 1000] += 1;
       return { ...d, x, y };
     });
-    const maximum = d3.max(bins);
     this.redrawheat();
-
-    //console.log(this.hexbin(this.dataset.map((d) => [d.x, d.y])));
-    const color = d3
-      .scaleLinear()
-      .domain([0, 600]) // Number of points in the bin?
-      .range(["transparent", "#69b3a2"]);
 
     this.svg.append("g").attr("id", "hexbins");
   }
@@ -127,48 +120,6 @@ export default class extends Controller {
       .scaleLinear()
       .domain([0, mx]) // Number of points in the bin?
       .range(["blue", "red"]);
-    //.domain([0, 0.33 * 100, 0.66 * 100, 1 * 100]) // Number of points in the bin?
-    //.range(["transparent", "blue", "lime", "red"]);
-
-    const densityData = d3
-      .contourDensity()
-      .x((d) => d[0])
-      .y((d) => d[1])
-      .size([
-        this.containerTarget.clientWidth,
-        this.containerTarget.clientHeight,
-      ])
-      .bandwidth(8)
-      .thresholds(64)(
-      this.dataset
-        .filter(this.wordFilter)
-        .filter(this.timeFilter)
-        .map(({ x, y }) => [x, y])
-    );
-
-    // this.svg
-    //   .select("#hexbins")
-    //   //.insert("g", "g")
-    //   .selectAll("path")
-    //   .data(densityData)
-    //   .join(
-    //     (enter: any) => {
-    //       return enter
-    //         .append("path")
-    //         .attr("d", d3.geoPath())
-    //         .attr("fill", (d: any) => color(d.value));
-    //     },
-    //     (update: any) => {
-    //       return update
-    //         .attr("d", d3.geoPath())
-    //         .attr("fill", (d: any) => color(d.value));
-    //     },
-    //     (exit: any) => {
-    //       return exit.remove();
-    //     }
-    //   );
-
-    //return;
 
     this.svg
       .select("#hexbins")
