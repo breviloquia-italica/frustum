@@ -54,15 +54,14 @@ export default class extends Controller {
     // this.heat.resize();
     this.heat.radius(3, 6);
 
+    const extent: [[number, number], [number, number]] = [
+      [0, 0],
+      [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
+    ];
+
     const bb = (await d3.json<d3.ExtendedFeatureCollection>(MAP_URL.regions))!;
     this.projection = d3.geoEqualEarth();
-    this.projection.fitExtent(
-      [
-        [20, 20],
-        [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
-      ],
-      bb
-    );
+    this.projection.fitExtent(extent, bb);
     const geoGenerator = d3.geoPath().projection(this.projection);
     this.svg = d3
       .select(this.containerTarget)
@@ -71,26 +70,19 @@ export default class extends Controller {
       .style("height", "100%");
     this.svg
       .append("g")
+      .attr("id", "italy")
       .selectAll("path")
       .data(bb.features)
       .enter()
       .append("path")
-      .attr("d", geoGenerator)
-      .attr("fill", "#BBB")
-      .attr("stroke", "#FFF")
-      .attr("stroke-width", ".5px");
+      .attr("d", geoGenerator);
     this.dots = d3
       .select(this.containerTarget)
       .select("svg")
       .append("g")
       .attr("class", "dots");
 
-    this.hexbin = hexbin()
-      .radius(6) // size of the bin in px
-      .extent([
-        [0, 0],
-        [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
-      ]);
+    this.hexbin = hexbin().radius(6).extent(extent);
   }
 
   disconnect() {}

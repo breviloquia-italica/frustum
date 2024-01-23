@@ -33,3 +33,14 @@
     /* font-family: 'Linux Libertine Mono O', sans-serif; */
   }
 }
+
+@layer components {
+  svg {
+    background-color: lightgray;
+    #italy path {
+      fill: black;
+      stroke: lightgray;
+      stroke-width: 1px;
+    }
+  }
+}
