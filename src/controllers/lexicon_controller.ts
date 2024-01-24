@@ -10,6 +10,8 @@ export default class extends Controller {
   timeFilter = buildTimeFilter(null);
   landFilter = buildLandFilter(null);
 
+  facet: DatasetRow[] = [];
+
   async connect() {
     this.selectTarget.addEventListener("change", () => {
       const wordlist = Array.from(this.selectTarget.selectedOptions).map(
@@ -26,25 +28,38 @@ export default class extends Controller {
   reloadDataset({
     detail: { dataset },
   }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    // TODO: sort
+    this.facet = dataset;
+    this.redraw();
+  }
+
+  redraw() {
     const countByWord = d3.rollup(
-      dataset,
+      this.facet
+        .filter((d) => this.timeFilter(d))
+        .filter((d) => this.landFilter(d)),
       (v) => v.length,
       (d) => d.word,
     );
 
-    this.selectTarget.innerHTML = "";
-    // Sort the countByWord map by count in descending order
-    const sortedWords = Array.from(countByWord.entries()).sort(
-      (a, b) => b[1] - a[1],
-    );
-
-    // Create and append options to the selectTarget
-    sortedWords.forEach(([word, count]) => {
-      const option = document.createElement("option");
-      option.value = word;
-      option.textContent = `${word} (${count})`;
-      this.selectTarget.appendChild(option);
-    });
+    d3.select(this.selectTarget)
+      .selectAll("option")
+      .data(countByWord)
+      .join(
+        (enter: any) => {
+          return enter
+            .append("option")
+            .attr("value", ([k, v]: [string, number]) => k)
+            .attr("count", ([k, v]: [string, number]) => v)
+            .text(([k, v]: [string, number]) => k);
+        },
+        (update: any) => {
+          return update.attr("count", ([k, v]: [string, number]) => v);
+        },
+        (exit: any) => {
+          return exit.attr("count", "0");
+        },
+      );
   }
 
   updateFilter({
@@ -55,6 +70,6 @@ export default class extends Controller {
   }>) {
     this.timeFilter = buildTimeFilter(timespan);
     this.landFilter = buildLandFilter(landarea);
-    // TODO
+    this.redraw();
   }
 }

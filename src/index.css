@@ -45,4 +45,11 @@
       stroke-width: 1px;
     }
   }
+  option::after {
+    content: attr(count);
+    width: 4rem;
+    float: right;
+    text-align: right;
+    font-family: monospace;
+  }
 }
