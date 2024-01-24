@@ -30,11 +30,9 @@ export default class extends Controller {
       (d) => d.word,
     );
 
-    // TODO: improve sorting? Maybe do it on first init by count?
-    const sorted = Array.from(countByWord).sort(([a], [b]) =>
-      a.localeCompare(b),
-    );
-    //const sorted = Array.from(countByWord).sort(([x, a], [y, b]) => b - a);
+    const sorted = Array.from(countByWord)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([, a], [, b]) => b - a);
 
     d3.select(this.selectTarget)
       .selectAll<HTMLOptionElement, [string, number]>("option")
