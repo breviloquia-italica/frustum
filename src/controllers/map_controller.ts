@@ -98,25 +98,14 @@ export default class extends Controller {
     this.redrawheat();
   }
 
-  updateWordlist({
-    detail: { wordlist },
+  updateFilter({
+    detail: { wordlist, timespan },
   }: CustomEvent<{
-    wordlist: string[];
-  }>) {
-    this.wordFilter = buildWordFilter(wordlist);
-    this.applyFilter();
-  }
-
-  updateTimespan({
-    detail: { timespan },
-  }: CustomEvent<{
+    wordlist: string[] | null;
     timespan: [Date, Date] | null;
   }>) {
+    this.wordFilter = buildWordFilter(wordlist);
     this.timeFilter = buildTimeFilter(timespan);
-    this.applyFilter();
-  }
-
-  applyFilter() {
     this.redrawheat();
   }
 

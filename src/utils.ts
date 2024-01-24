@@ -1,6 +1,6 @@
 export const buildWordFilter = function (wordlist: string[] | null) {
   let wordFilter: (d: { word: string }) => boolean;
-  if (wordlist === null || wordlist.length < 1) {
+  if (wordlist === null || wordlist === undefined || wordlist.length < 1) {
     wordFilter = () => true;
   } else {
     const selectedSet = new Set(wordlist);
@@ -11,7 +11,7 @@ export const buildWordFilter = function (wordlist: string[] | null) {
 
 export const buildTimeFilter = function (timespan: [Date, Date] | null) {
   let timeFilter: (d: { time: number }) => boolean;
-  if (timespan === null) {
+  if (timespan === null || timespan === undefined) {
     timeFilter = () => true;
   } else {
     // NOTE: comparing millis is much faster
