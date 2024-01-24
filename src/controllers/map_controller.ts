@@ -52,6 +52,7 @@ export default class extends Controller {
       .append("svg")
       .style("width", "100%")
       .style("height", "100%");
+    this.svg.append("g").attr("id", "hexbins");
     this.svg
       .append("g")
       .attr("id", "italy")
@@ -61,7 +62,6 @@ export default class extends Controller {
       .append("path")
       .attr("d", geoGenerator);
 
-    this.svg.append("g").attr("id", "hexbins");
     this.hexbin = hexbin().radius(6).extent(this.extent);
 
     this.initBrush();
