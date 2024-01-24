@@ -146,8 +146,8 @@ export default class extends Controller {
             });
         },
         (exit: any) => {
+          return exit.remove();
           // FIXME: this doesn't quite work, as hexbins are not generated in a linear fashion
-          // return exit.remove();
           return exit.attr("fill", function (d: any) {
             return "#BBB";
           });
