@@ -1,10 +1,14 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 import { DatasetRow } from "./main_controller";
+import { buildLandFilter, buildTimeFilter } from "../utils";
 
 export default class extends Controller {
   static targets = ["select"];
   declare readonly selectTarget: HTMLSelectElement;
+
+  timeFilter = buildTimeFilter(null);
+  landFilter = buildLandFilter(null);
 
   async connect() {
     this.selectTarget.addEventListener("change", () => {
@@ -41,5 +45,16 @@ export default class extends Controller {
       option.textContent = `${word} (${count})`;
       this.selectTarget.appendChild(option);
     });
+  }
+
+  updateFilter({
+    detail: { landarea, timespan },
+  }: CustomEvent<{
+    timespan: [Date, Date] | null;
+    landarea: [[number, number], [number, number]] | null;
+  }>) {
+    this.timeFilter = buildTimeFilter(timespan);
+    this.landFilter = buildLandFilter(landarea);
+    // TODO
   }
 }

@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
-import { buildWordFilter } from "../utils";
+import { buildLandFilter, buildWordFilter } from "../utils";
 import { DatasetRow } from "./main_controller";
 
 type FacetRow = DatasetRow & {
@@ -25,6 +25,7 @@ export default class extends Controller {
   facet: FacetRow[] = [];
 
   wordFilter = buildWordFilter(null);
+  landFilter = buildLandFilter(null);
 
   connect(): void {
     this.width =
@@ -88,7 +89,9 @@ export default class extends Controller {
 
   buildHistogram() {
     const countByDay = d3.rollup(
-      this.facet.filter(({ word }) => this.wordFilter({ word })),
+      this.facet
+        .filter((d) => this.wordFilter(d))
+        .filter((d) => this.landFilter(d)),
       (v) => v.length,
       (d) => d.day,
     );
@@ -122,11 +125,14 @@ export default class extends Controller {
   }
 
   updateFilter({
-    detail: { wordlist },
+    detail: { landarea, wordlist },
   }: CustomEvent<{
-    wordlist: string[];
+    landarea: [[number, number], [number, number]] | null;
+    wordlist: string[] | null;
   }>) {
     this.wordFilter = buildWordFilter(wordlist);
+    this.landFilter = buildLandFilter(landarea);
+
     const histogramData = this.buildHistogram();
 
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [

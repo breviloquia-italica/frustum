@@ -99,10 +99,10 @@ export default class extends Controller {
   }
 
   updateFilter({
-    detail: { wordlist, timespan },
+    detail: { timespan, wordlist },
   }: CustomEvent<{
-    wordlist: string[] | null;
     timespan: [Date, Date] | null;
+    wordlist: string[] | null;
   }>) {
     this.wordFilter = buildWordFilter(wordlist);
     this.timeFilter = buildTimeFilter(timespan);

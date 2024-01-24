@@ -16,7 +16,10 @@ main:datasetChanged->timeline#reloadDataset
 main:datasetChanged->map#reloadDataset
 lexicon:wordlistChanged->timeline#updateFilter
 lexicon:wordlistChanged->map#updateFilter
+timeline:timespanChanged->lexicon#updateFilter
 timeline:timespanChanged->map#updateFilter
+map:landareaChanged->lexicon#updateFilter
+map:landareaChanged->timeline#updateFilter
     ">
     <section class="bg-red-50 row-span-2 flex flex-col">
       <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
