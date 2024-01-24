@@ -1,6 +1,12 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
-import { buildLandFilter, buildWordFilter } from "../utils";
+import {
+  buildTimeFilter,
+  FilterChangeEvent,
+  LandFilter,
+  TimeFilter,
+  WordFilter,
+} from "../filter";
 import { DatasetRow } from "./main_controller";
 
 type FacetRow = DatasetRow & {
@@ -23,9 +29,6 @@ export default class extends Controller {
   extent!: [[number, number], [number, number]];
 
   facet: FacetRow[] = [];
-
-  wordFilter = buildWordFilter(null);
-  landFilter = buildLandFilter(null);
 
   connect(): void {
     this.width =
@@ -118,21 +121,10 @@ export default class extends Controller {
           this.xScale.invert(event.selection[1] as d3.NumberValue),
         ]
       : null;
-
-    this.dispatch("timespanChanged", {
-      detail: { timespan },
-    });
+    this.changeTimeFilter(timespan);
   }
 
-  updateFilter({
-    detail: { landarea, wordlist },
-  }: CustomEvent<{
-    landarea: [[number, number], [number, number]] | null;
-    wordlist: string[] | null;
-  }>) {
-    this.wordFilter = buildWordFilter(wordlist);
-    this.landFilter = buildLandFilter(landarea);
-
+  redraw() {
     const histogramData = this.buildHistogram();
 
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
@@ -152,5 +144,24 @@ export default class extends Controller {
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
       .attr("x", (d) => this.xScale(new Date(d.day)));
+  }
+
+  //=[ FILTERING ]==============================================================
+
+  landFilter: LandFilter = () => true;
+  timeFilter: TimeFilter = () => true;
+  wordFilter: WordFilter = () => true;
+
+  updateFilter({ detail: { landFilter, wordFilter } }: FilterChangeEvent) {
+    if (landFilter) this.landFilter = landFilter;
+    if (wordFilter) this.wordFilter = wordFilter;
+    this.redraw();
+  }
+
+  changeTimeFilter(timespan: [Date, Date] | null) {
+    this.timeFilter = buildTimeFilter(timespan);
+    this.dispatch("filterChanged", {
+      detail: { timeFilter: this.timeFilter },
+    });
   }
 }

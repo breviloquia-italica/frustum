@@ -12,7 +12,13 @@ const MAP_URL = {
 
 import * as d3 from "d3";
 import { Hexbin, hexbin } from "d3-hexbin";
-import { buildTimeFilter, buildWordFilter } from "../utils";
+import {
+  buildLandFilter,
+  FilterChangeEvent,
+  LandFilter,
+  TimeFilter,
+  WordFilter,
+} from "../filter";
 import { DatasetRow } from "./main_controller";
 
 type FacetRow = DatasetRow & {
@@ -29,9 +35,6 @@ export default class extends Controller {
   svg!: any;
 
   facet: FacetRow[] = [];
-
-  timeFilter = buildTimeFilter(null);
-  wordFilter = buildWordFilter(null);
 
   async connect() {
     const extent: [[number, number], [number, number]] = [
@@ -80,10 +83,7 @@ export default class extends Controller {
             this.projection.invert!(event.selection[1] as [number, number])!,
           ]
         : null;
-
-    this.dispatch("landareaChanged", {
-      detail: { landarea },
-    });
+    this.changeLandFilter(landarea);
   }
 
   disconnect() {}
@@ -95,21 +95,10 @@ export default class extends Controller {
       const [x, y] = this.projection([row.longitude, row.latitude])!;
       return { ...row, x, y };
     });
-    this.redrawheat();
+    this.redraw();
   }
 
-  updateFilter({
-    detail: { timespan, wordlist },
-  }: CustomEvent<{
-    timespan: [Date, Date] | null;
-    wordlist: string[] | null;
-  }>) {
-    this.wordFilter = buildWordFilter(wordlist);
-    this.timeFilter = buildTimeFilter(timespan);
-    this.redrawheat();
-  }
-
-  redrawheat() {
+  redraw() {
     const dee = this.facet
       .filter(this.wordFilter)
       .filter(this.timeFilter)
@@ -153,5 +142,24 @@ export default class extends Controller {
           });
         },
       );
+  }
+
+  //=[ FILTERING ]==============================================================
+
+  landFilter: LandFilter = () => true;
+  timeFilter: TimeFilter = () => true;
+  wordFilter: WordFilter = () => true;
+
+  updateFilter({ detail: { timeFilter, wordFilter } }: FilterChangeEvent) {
+    if (timeFilter) this.timeFilter = timeFilter;
+    if (wordFilter) this.wordFilter = wordFilter;
+    this.redraw();
+  }
+
+  changeLandFilter(landarea: [[number, number], [number, number]] | null) {
+    this.landFilter = buildLandFilter(landarea);
+    this.dispatch("filterChanged", {
+      detail: { landFilter: this.landFilter },
+    });
   }
 }

@@ -1,14 +1,17 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 import { DatasetRow } from "./main_controller";
-import { buildLandFilter, buildTimeFilter } from "../utils";
+import {
+  buildWordFilter,
+  FilterChangeEvent,
+  LandFilter,
+  TimeFilter,
+  WordFilter,
+} from "../filter";
 
 export default class extends Controller {
   static targets = ["select"];
   declare readonly selectTarget: HTMLSelectElement;
-
-  timeFilter = buildTimeFilter(null);
-  landFilter = buildLandFilter(null);
 
   facet: DatasetRow[] = [];
 
@@ -17,9 +20,7 @@ export default class extends Controller {
       const wordlist = Array.from(this.selectTarget.selectedOptions).map(
         (option) => option.value,
       );
-      this.dispatch("wordlistChanged", {
-        detail: { wordlist },
-      });
+      this.changeWordFilter(wordlist);
     });
   }
 
@@ -62,14 +63,21 @@ export default class extends Controller {
       );
   }
 
-  updateFilter({
-    detail: { landarea, timespan },
-  }: CustomEvent<{
-    timespan: [Date, Date] | null;
-    landarea: [[number, number], [number, number]] | null;
-  }>) {
-    this.timeFilter = buildTimeFilter(timespan);
-    this.landFilter = buildLandFilter(landarea);
+  //=[ FILTERING ]==============================================================
+
+  landFilter: LandFilter = () => true;
+  timeFilter: TimeFilter = () => true;
+  wordFilter: WordFilter = () => true;
+
+  updateFilter({ detail: { landFilter, timeFilter } }: FilterChangeEvent) {
+    if (landFilter) this.landFilter = landFilter;
+    if (timeFilter) this.timeFilter = timeFilter;
     this.redraw();
+  }
+  changeWordFilter(wordlist: string[] | null) {
+    this.wordFilter = buildWordFilter(wordlist);
+    this.dispatch("filterChanged", {
+      detail: { wordFilter: this.wordFilter },
+    });
   }
 }
