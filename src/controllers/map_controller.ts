@@ -20,6 +20,7 @@ import {
   WordFilter,
 } from "../filter";
 import { DatasetRow } from "./main_controller";
+import { ramp } from "../utils";
 
 type FacetRow = DatasetRow & {
   x: number;
@@ -37,21 +38,22 @@ export default class extends Controller {
 
   facet: FacetRow[] = [];
 
+  cScale!: d3.ScaleLinear<number, number, never>;
+
   async connect() {
     this.extent = [
-      [0, 0],
-      [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
+      [64, 0],
+      [
+        this.containerTarget.clientWidth - 64,
+        this.containerTarget.clientHeight,
+      ],
     ];
 
     const bb = (await d3.json<d3.ExtendedFeatureCollection>(MAP_URL.regions))!;
     this.projection = d3.geoEqualEarth();
     this.projection.fitExtent(this.extent, bb);
     const geoGenerator = d3.geoPath().projection(this.projection);
-    this.svg = d3
-      .select(this.containerTarget)
-      .append("svg")
-      .style("width", "100%")
-      .style("height", "100%");
+    this.svg = d3.select(this.containerTarget).append("svg");
     this.svg.append("g").attr("id", "hexbins");
     this.svg
       .append("g")
@@ -65,6 +67,7 @@ export default class extends Controller {
     this.hexbin = hexbin().radius(6).extent(this.extent);
 
     this.initBrush();
+    this.initLegend();
   }
 
   disconnect() {}
@@ -75,10 +78,10 @@ export default class extends Controller {
       .filter(this.timeFilter)
       .map(({ x, y }) => [x, y]);
     const mx = Math.max(...this.hexbin(dee).map((h) => h.length), 0);
-    const color = d3
-      .scaleLinear()
-      .domain([0, mx]) // Number of points in the bin?
-      .range(["blue", "red"]);
+    const color = (t: number) => d3.interpolateCool(t / mx); // TODO: maybe Cividis?
+
+    this.cScale.domain([mx, 0] as [number, number]);
+    this.drawCAxis();
 
     this.svg
       .select("#hexbins")
@@ -101,6 +104,35 @@ export default class extends Controller {
           return exit.remove();
         },
       );
+  }
+
+  initLegend() {
+    this.cScale = d3
+      .scaleLinear()
+      .range([10, this.containerTarget.clientHeight - 10]);
+
+    this.drawCColorBar();
+    this.drawCAxis();
+  }
+
+  drawCAxis() {
+    this.svg.select("#cAxis").remove();
+    this.svg
+      .append("g")
+      .attr("id", "cAxis")
+      .attr("transform", `translate(30,0)`)
+      .call(d3.axisRight(this.cScale));
+  }
+
+  drawCColorBar() {
+    this.svg
+      .append("image")
+      .attr("x", 10)
+      .attr("y", 10)
+      .attr("width", 20)
+      .attr("height", this.containerTarget.clientHeight - 20)
+      .attr("preserveAspectRatio", "none")
+      .attr("xlink:href", ramp(d3.interpolateViridis).toDataURL());
   }
 
   //=[ DATA INGESTION ]=========================================================
