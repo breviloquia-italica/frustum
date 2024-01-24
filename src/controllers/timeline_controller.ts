@@ -75,6 +75,9 @@ export default class extends Controller {
     this.redrawXAxis();
     this.redrawYAxis();
 
+    // TODO: there must be a better way...
+    const bandwidth = this.xScale.range()[1] / 365;
+
     this.svg
       .select("#bars")
       .selectAll<SVGRectElement, { day: string; count: number }>("rect")
@@ -83,7 +86,7 @@ export default class extends Controller {
         (enter) => {
           return enter
             .append("rect")
-            .attr("width", 2) // TODO: compute band width
+            .attr("width", bandwidth) // TODO: compute band width
             .attr("height", (d) => this.height - this.yScale(d.count))
             .attr("y", (d) => this.yScale(d.count))
             .attr("x", (d) => this.xScale(new Date(d.day)));
