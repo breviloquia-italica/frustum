@@ -33,18 +33,19 @@ export default class extends Controller {
   projection!: d3.GeoProjection;
   hexbin!: Hexbin<[number, number]>;
   svg!: any;
+  extent!: [[number, number], [number, number]];
 
   facet: FacetRow[] = [];
 
   async connect() {
-    const extent: [[number, number], [number, number]] = [
+    this.extent = [
       [0, 0],
       [this.containerTarget.clientWidth, this.containerTarget.clientHeight],
     ];
 
     const bb = (await d3.json<d3.ExtendedFeatureCollection>(MAP_URL.regions))!;
     this.projection = d3.geoEqualEarth();
-    this.projection.fitExtent(extent, bb);
+    this.projection.fitExtent(this.extent, bb);
     const geoGenerator = d3.geoPath().projection(this.projection);
     this.svg = d3
       .select(this.containerTarget)
@@ -61,29 +62,9 @@ export default class extends Controller {
       .attr("d", geoGenerator);
 
     this.svg.append("g").attr("id", "hexbins");
-    this.hexbin = hexbin().radius(6).extent(extent);
+    this.hexbin = hexbin().radius(6).extent(this.extent);
 
-    const brush = d3
-      .brush()
-      .extent(extent)
-      .on("start brush end", this.handleBrush.bind(this));
-
-    this.svg
-      .append("g")
-      .attr("id", "mapBrush")
-      .call(brush)
-      .call(brush.move, null);
-  }
-
-  handleBrush(event: d3.D3BrushEvent<unknown>) {
-    const landarea: [[number, number], [number, number]] | null =
-      event.selection
-        ? [
-            this.projection.invert!(event.selection[0] as [number, number])!,
-            this.projection.invert!(event.selection[1] as [number, number])!,
-          ]
-        : null;
-    this.changeLandFilter(landarea);
+    this.initBrush();
   }
 
   disconnect() {}
@@ -144,6 +125,32 @@ export default class extends Controller {
       return { ...row, x, y };
     });
     this.redraw();
+  }
+
+  //=[ BRUSHING ]===============================================================
+
+  initBrush() {
+    const brush = d3
+      .brush()
+      .extent(this.extent)
+      .on("start brush end", this.handleBrushEvent.bind(this));
+
+    this.svg
+      .append("g")
+      .attr("id", "mapBrush")
+      .call(brush)
+      .call(brush.move, null);
+  }
+
+  handleBrushEvent(event: d3.D3BrushEvent<unknown>) {
+    const landarea: [[number, number], [number, number]] | null =
+      event.selection
+        ? [
+            this.projection.invert!(event.selection[0] as [number, number])!,
+            this.projection.invert!(event.selection[1] as [number, number])!,
+          ]
+        : null;
+    this.changeLandFilter(landarea);
   }
 
   //=[ FILTERING ]==============================================================

@@ -16,12 +16,7 @@ export default class extends Controller {
   facet: DatasetRow[] = [];
 
   async connect() {
-    this.selectTarget.addEventListener("change", () => {
-      const wordlist = Array.from(this.selectTarget.selectedOptions).map(
-        (option) => option.value,
-      );
-      this.changeWordFilter(wordlist);
-    });
+    this.initBrush();
   }
 
   disconnect() {}
@@ -63,6 +58,23 @@ export default class extends Controller {
     // TODO: sort
     this.facet = dataset;
     this.redraw();
+  }
+
+  //=[ BRUSHING ]===============================================================
+
+  // NOTE: technically not brushing, but whatever.
+
+  initBrush() {
+    this.selectTarget.addEventListener(
+      "change",
+      this.handleBrushEvent.bind(this),
+    );
+  }
+
+  handleBrushEvent() {
+    const selectedOptions = Array.from(this.selectTarget.selectedOptions);
+    const wordlist = selectedOptions.map((option) => option.value);
+    this.changeWordFilter(wordlist);
   }
 
   //=[ FILTERING ]==============================================================

@@ -98,25 +98,6 @@ export default class extends Controller {
     }));
   }
 
-  initBrush() {
-    const brush = d3
-      .brushX()
-      .extent(this.extent)
-      .on("start brush end", this.handleBrushEvent.bind(this));
-
-    this.svg.append("g").attr("id", "brush").call(brush).call(brush.move, null);
-  }
-
-  handleBrushEvent(event: d3.D3BrushEvent<unknown>) {
-    const timespan: [Date, Date] | null = event.selection
-      ? [
-          this.xScale.invert(event.selection[0] as d3.NumberValue),
-          this.xScale.invert(event.selection[1] as d3.NumberValue),
-        ]
-      : null;
-    this.changeTimeFilter(timespan);
-  }
-
   redraw() {
     const histogramData = this.buildHistogram();
 
@@ -149,6 +130,27 @@ export default class extends Controller {
       return { ...row, day };
     });
     this.firstRedraw();
+  }
+
+  //=[ BRUSHING ]===============================================================
+
+  initBrush() {
+    const brush = d3
+      .brushX()
+      .extent(this.extent)
+      .on("start brush end", this.handleBrushEvent.bind(this));
+
+    this.svg.append("g").attr("id", "brush").call(brush).call(brush.move, null);
+  }
+
+  handleBrushEvent(event: d3.D3BrushEvent<unknown>) {
+    const timespan: [Date, Date] | null = event.selection
+      ? [
+          this.xScale.invert(event.selection[0] as d3.NumberValue),
+          this.xScale.invert(event.selection[1] as d3.NumberValue),
+        ]
+      : null;
+    this.changeTimeFilter(timespan);
   }
 
   //=[ FILTERING ]==============================================================
