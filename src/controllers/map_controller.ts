@@ -174,7 +174,7 @@ export default class extends Controller {
           // FIXME: this doesn't quite work, as hexbins are not generated in a linear fashion
           // return exit.remove();
           return exit.attr("fill", function (d: any) {
-            return color(d.length);
+            return "#BBB";
           });
         },
       );
