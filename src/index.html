@@ -27,8 +27,19 @@ map:filterChanged->timeline#updateFilter
     <section class="bg-white">
       <div class="w-full h-full" data-map-target="container"></div>
     </section>
-    <section class="">
-      <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
+    <section class="flex flex-col p-1 gap-2">
+      <input class="
+        block w-full text-sm
+      file:bg-slate-50 file:hover:bg-slate-100 file:active:bg-slate-300
+        file:mr-4 file:py-2 file:px-4 file:rounded-md
+        file:border-0 file:text-sm file:font-semibold
+      " type="file" data-action="change->main#changeDataset" />
+      <!-- <input class="
+        block w-full
+        bg-slate-50 hover:bg-slate-100 active:bg-slate-300
+        mr-4 py-2 px-4 rounded-md
+        border-0 text-sm font-semibold
+      " type="reset" /> -->
     </section>
     <section class="bg-white">
       <div class="w-full h-full" data-timeline-target="container"></div>
