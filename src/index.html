@@ -10,7 +10,7 @@
 </head>
 
 <body class="flex flex-col w-screen h-screen overflow-hidden">
-  <main class="bg-slate-50 h-full" data-controller="main lexicon timeline map" data-action="
+  <main class="h-full bg-slate-200 gap-1 p-1" data-controller="main lexicon timeline map" data-action="
 main:datasetChanged->lexicon#updateDataset
 main:datasetChanged->timeline#updateDataset
 main:datasetChanged->map#updateDataset
@@ -21,16 +21,16 @@ timeline:filterChanged->map#updateFilter
 map:filterChanged->lexicon#updateFilter
 map:filterChanged->timeline#updateFilter
     ">
-    <section class="bg-red-50 row-span-2 flex flex-col">
-      <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
+    <section class="bg-white">
       <select multiple data-lexicon-target="select" class="w-full h-full"></select>
     </section>
-    <section class="bg-white relative">
+    <section class="bg-white">
       <div class="w-full h-full" data-map-target="container"></div>
     </section>
-    <section class="bg-blue-50">
-      <!-- <input class="w-full" type="range" id="minDate" value="20" min="0" max="100" /> -->
-      <!-- <input class="w-full" type="range" id="maxDate" value="80" min="0" max="100" /> -->
+    <section class="">
+      <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
+    </section>
+    <section class="bg-white">
       <div class="w-full h-full" data-timeline-target="container"></div>
     </section>
   </main>
