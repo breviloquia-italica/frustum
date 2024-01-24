@@ -8,43 +8,41 @@ type FacetRow = DatasetRow & {
 };
 
 export default class extends Controller {
-  static targets = ["fileInput", "sliderContainer"];
+  static targets = ["fileInput", "container"];
   declare readonly fileInputTarget: HTMLInputElement;
-  declare readonly sliderContainerTarget: HTMLDivElement;
+  declare readonly containerTarget: HTMLDivElement;
 
   svg!: d3.Selection<SVGGElement, unknown, null, undefined>;
 
   xScale!: d3.ScaleTime<number, number, never>;
   yScale!: d3.ScaleLinear<number, number, never>;
 
-  margin!: { top: number; right: number; bottom: number; left: number };
+  margin = { top: 8, right: 16, bottom: 16, left: 32 };
   width!: number;
   height!: number;
+  extent!: [[number, number], [number, number]];
 
   facet: FacetRow[] = [];
 
-  connect(): void {
-    this.margin = { top: 8, right: 16, bottom: 16, left: 32 };
-    this.width =
-      this.sliderContainerTarget.clientWidth -
-      this.margin.left -
-      this.margin.right;
-    this.height =
-      this.sliderContainerTarget.clientHeight -
-      this.margin.top -
-      this.margin.bottom;
+  wordFilter = buildWordFilter(null);
 
-    // Append the svg object to the container
+  connect(): void {
+    this.width =
+      this.containerTarget.clientWidth - this.margin.left - this.margin.right;
+    this.height =
+      this.containerTarget.clientHeight - this.margin.top - this.margin.bottom;
+    this.extent = [
+      [0, 0],
+      [this.width, this.height],
+    ];
+
     this.svg = d3
-      .select(this.sliderContainerTarget)
+      .select(this.containerTarget)
       .append("svg")
-      .attr("width", "100%") // this.width + this.margin.left + this.margin.right)
-      .attr("height", "100%") // this.height + this.margin.top + this.margin.bottom)
       .append("g")
       .attr("transform", `translate(${this.margin.left},${this.margin.top})`);
 
     this.xScale = d3.scaleTime().range([0, this.width]);
-
     this.yScale = d3.scaleLinear().range([this.height, 0]);
   }
 
@@ -56,22 +54,12 @@ export default class extends Controller {
       day: d3.timeFormat("%Y-%m-%d")(new Date(row.time)),
     }));
 
-    const countByDay = d3.rollup(
-      this.facet,
-      (v) => v.length,
-      (d) => d.day,
-    );
-
-    const histogramData = Array.from(countByDay, ([day, count]) => ({
-      day,
-      count,
-    }));
+    const histogramData = this.buildHistogram();
 
     this.xScale.domain(
-      d3.extent(dataset, ({ time }) => time) as [number, number],
+      d3.extent(this.facet, ({ time }) => time) as [number, number],
     );
 
-    // TODO: y changes when wordlist changes
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
       number,
       number,
@@ -95,18 +83,32 @@ export default class extends Controller {
       .attr("y", (d) => this.yScale(d.count))
       .attr("x", (d) => this.xScale(new Date(d.day)));
 
-    const brush = d3
-      .brushX()
-      .extent([
-        [0, 0],
-        [this.width, this.height],
-      ])
-      .on("start brush end", this.handleBrush.bind(this));
-
-    this.svg.append("g").attr("id", "brush").call(brush).call(brush.move, null); // this.xScale.range() as any);
+    this.initBrush();
   }
 
-  handleBrush(event: d3.D3BrushEvent<unknown>) {
+  buildHistogram() {
+    const countByDay = d3.rollup(
+      this.facet.filter(({ word }) => this.wordFilter({ word })),
+      (v) => v.length,
+      (d) => d.day,
+    );
+
+    return Array.from(countByDay, ([day, count]) => ({
+      day,
+      count,
+    }));
+  }
+
+  initBrush() {
+    const brush = d3
+      .brushX()
+      .extent(this.extent)
+      .on("start brush end", this.handleBrushEvent.bind(this));
+
+    this.svg.append("g").attr("id", "brush").call(brush).call(brush.move, null);
+  }
+
+  handleBrushEvent(event: d3.D3BrushEvent<unknown>) {
     const timespan: [Date, Date] | null = event.selection
       ? [
           this.xScale.invert(event.selection[0] as d3.NumberValue),
@@ -119,24 +121,13 @@ export default class extends Controller {
     });
   }
 
-  updateWordlist({
+  updateFilter({
     detail: { wordlist },
   }: CustomEvent<{
     wordlist: string[];
   }>) {
-    const filter = buildWordFilter(wordlist);
-
-    const countByDay = d3.rollup(
-      this.facet.filter(({ word }) => filter({ word })),
-      (v) => v.length,
-      (d) => d.day,
-    );
-
-    // Convert the Map to an array of objects for easier processing
-    const histogramData = Array.from(countByDay, ([day, count]) => ({
-      day,
-      count,
-    }));
+    this.wordFilter = buildWordFilter(wordlist);
+    const histogramData = this.buildHistogram();
 
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
       number,
@@ -155,9 +146,5 @@ export default class extends Controller {
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
       .attr("x", (d) => this.xScale(new Date(d.day)));
-
-    //this.dots.selectAll("circle").attr("visibility", (d: any) => {
-    //  return wordFilter(d) ? "visible" : "hidden";
-    //});
   }
 }

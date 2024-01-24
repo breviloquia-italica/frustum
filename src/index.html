@@ -1,54 +1,38 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frustum</title>
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.cdnfonts.com/css/linux-libertine-o"
-      rel="stylesheet"
-    />
-  </head>
 
-  <body class="flex flex-col w-screen h-screen overflow-hidden">
-    <main
-      class="bg-slate-50 h-full"
-      data-controller="main lexicon timeline map"
-      data-action="
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>frustum</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/linux-libertine-o" rel="stylesheet" />
+</head>
+
+<body class="flex flex-col w-screen h-screen overflow-hidden">
+  <main class="bg-slate-50 h-full" data-controller="main lexicon timeline map" data-action="
 main:datasetChanged->lexicon#reloadDataset
 main:datasetChanged->timeline#reloadDataset
 main:datasetChanged->map#reloadDataset
-lexicon:wordlistChanged->timeline#updateWordlist
+lexicon:wordlistChanged->timeline#updateFilter
 lexicon:wordlistChanged->map#updateWordlist
 timeline:timespanChanged->map#updateTimespan
-    "
-    >
-      <section class="bg-red-50 row-span-2 flex flex-col">
-        <input
-          class="w-full p-2"
-          type="file"
-          data-action="change->main#changeDataset"
-        />
-        <select
-          multiple
-          data-lexicon-target="select"
-          class="w-full h-full"
-        ></select>
-      </section>
-      <section class="bg-gray-50 relative">
-        <div class="w-full h-full" data-map-target="container"></div>
-      </section>
-      <section class="bg-blue-50">
-        <!-- <input class="w-full" type="range" id="minDate" value="20" min="0" max="100" /> -->
-        <!-- <input class="w-full" type="range" id="maxDate" value="80" min="0" max="100" /> -->
-        <div class="w-full h-full" data-timeline-target="sliderContainer"></div>
-      </section>
-    </main>
+    ">
+    <section class="bg-red-50 row-span-2 flex flex-col">
+      <input class="w-full p-2" type="file" data-action="change->main#changeDataset" />
+      <select multiple data-lexicon-target="select" class="w-full h-full"></select>
+    </section>
+    <section class="bg-gray-50 relative">
+      <div class="w-full h-full" data-map-target="container"></div>
+    </section>
+    <section class="bg-blue-50">
+      <!-- <input class="w-full" type="range" id="minDate" value="20" min="0" max="100" /> -->
+      <!-- <input class="w-full" type="range" id="maxDate" value="80" min="0" max="100" /> -->
+      <div class="w-full h-full" data-timeline-target="container"></div>
+    </section>
+  </main>
 
-    <script type="module" src="index.ts"></script>
-  </body>
+  <script type="module" src="index.ts"></script>
+</body>
+
 </html>
