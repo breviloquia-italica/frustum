@@ -50,14 +50,7 @@ export default class extends Controller {
     this.yScale = d3.scaleLinear().range([this.height, 0]);
   }
 
-  reloadDataset({
-    detail: { dataset },
-  }: CustomEvent<{ dataset: DatasetRow[] }>) {
-    this.facet = dataset.map((row) => ({
-      ...row,
-      day: d3.timeFormat("%Y-%m-%d")(new Date(row.time)),
-    }));
-
+  firstRedraw() {
     const histogramData = this.buildHistogram();
 
     this.xScale.domain(
@@ -144,6 +137,18 @@ export default class extends Controller {
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
       .attr("x", (d) => this.xScale(new Date(d.day)));
+  }
+
+  //=[ DATA INGESTION ]=========================================================
+
+  updateDataset({
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    this.facet = dataset.map((row) => {
+      const day = d3.timeFormat("%Y-%m-%d")(new Date(row.time));
+      return { ...row, day };
+    });
+    this.firstRedraw();
   }
 
   //=[ FILTERING ]==============================================================

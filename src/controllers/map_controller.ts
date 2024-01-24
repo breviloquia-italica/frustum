@@ -88,16 +88,6 @@ export default class extends Controller {
 
   disconnect() {}
 
-  reloadDataset({
-    detail: { dataset },
-  }: CustomEvent<{ dataset: DatasetRow[] }>) {
-    this.facet = dataset.map((row) => {
-      const [x, y] = this.projection([row.longitude, row.latitude])!;
-      return { ...row, x, y };
-    });
-    this.redraw();
-  }
-
   redraw() {
     const dee = this.facet
       .filter(this.wordFilter)
@@ -142,6 +132,18 @@ export default class extends Controller {
           });
         },
       );
+  }
+
+  //=[ DATA INGESTION ]=========================================================
+
+  updateDataset({
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    this.facet = dataset.map((row) => {
+      const [x, y] = this.projection([row.longitude, row.latitude])!;
+      return { ...row, x, y };
+    });
+    this.redraw();
   }
 
   //=[ FILTERING ]==============================================================

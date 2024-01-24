@@ -11,9 +11,9 @@
 
 <body class="flex flex-col w-screen h-screen overflow-hidden">
   <main class="bg-slate-50 h-full" data-controller="main lexicon timeline map" data-action="
-main:datasetChanged->lexicon#reloadDataset
-main:datasetChanged->timeline#reloadDataset
-main:datasetChanged->map#reloadDataset
+main:datasetChanged->lexicon#updateDataset
+main:datasetChanged->timeline#updateDataset
+main:datasetChanged->map#updateDataset
 lexicon:filterChanged->timeline#updateFilter
 lexicon:filterChanged->map#updateFilter
 timeline:filterChanged->lexicon#updateFilter

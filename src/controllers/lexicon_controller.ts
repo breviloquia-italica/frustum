@@ -26,14 +26,6 @@ export default class extends Controller {
 
   disconnect() {}
 
-  reloadDataset({
-    detail: { dataset },
-  }: CustomEvent<{ dataset: DatasetRow[] }>) {
-    // TODO: sort
-    this.facet = dataset;
-    this.redraw();
-  }
-
   redraw() {
     const countByWord = d3.rollup(
       this.facet
@@ -61,6 +53,16 @@ export default class extends Controller {
           return exit.attr("count", "0");
         },
       );
+  }
+
+  //=[ DATA INGESTION ]=========================================================
+
+  updateDataset({
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    // TODO: sort
+    this.facet = dataset;
+    this.redraw();
   }
 
   //=[ FILTERING ]==============================================================
