@@ -30,6 +30,8 @@ export default class extends Controller {
 
   facet: FacetRow[] = [];
 
+  histogramData: { day: string; count: number }[] = [];
+
   connect(): void {
     this.width =
       this.containerTarget.clientWidth - this.margin.left - this.margin.right;
@@ -48,38 +50,8 @@ export default class extends Controller {
 
     this.xScale = d3.scaleTime().range([0, this.width]);
     this.yScale = d3.scaleLinear().range([this.height, 0]);
-  }
 
-  firstRedraw() {
-    const histogramData = this.buildHistogram();
-
-    this.xScale.domain(
-      d3.extent(this.facet, ({ time }) => time) as [number, number],
-    );
-
-    this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
-      number,
-      number,
-    ]);
-
-    this.svg
-      .append("g")
-      .attr("transform", `translate(0,${this.height})`)
-      .call(d3.axisBottom(this.xScale));
-
-    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
-
-    this.svg
-      .append("g")
-      .attr("id", "bars")
-      .selectAll("rect")
-      .data(histogramData)
-      .join("rect")
-      .attr("width", 2) // bandwidth?
-      .attr("height", (d) => this.height - this.yScale(d.count))
-      .attr("y", (d) => this.yScale(d.count))
-      .attr("x", (d) => this.xScale(new Date(d.day)));
-
+    this.svg.append("g").attr("id", "bars");
     this.initBrush();
   }
 
@@ -99,25 +71,40 @@ export default class extends Controller {
   }
 
   redraw() {
-    const histogramData = this.buildHistogram();
-
-    this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
-      number,
-      number,
-    ]);
-
-    this.svg.select("#yAxis").remove();
-    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
+    this.histogramData = this.buildHistogram();
+    this.redrawXAxis();
+    this.redrawYAxis();
 
     this.svg
       .select("#bars")
       .selectAll("rect")
-      .data(histogramData)
+      .data(this.histogramData)
       .join("rect")
       .attr("width", 2) // bandwidth?
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
       .attr("x", (d) => this.xScale(new Date(d.day)));
+  }
+
+  redrawXAxis() {
+    // FIXME: this never changes but is always redrawn
+    const bounds = d3.extent(this.facet, ({ time }) => time);
+    this.xScale.domain(bounds as [number, number]);
+
+    this.svg.select("#xAxis").remove();
+    this.svg
+      .append("g")
+      .attr("id", "xAxis")
+      .attr("transform", `translate(0,${this.height})`)
+      .call(d3.axisBottom(this.xScale));
+  }
+
+  redrawYAxis() {
+    const bounds = [0, d3.max(this.histogramData, (d) => d.count)];
+    this.yScale.domain(bounds as [number, number]);
+
+    this.svg.select("#yAxis").remove();
+    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
   }
 
   //=[ DATA INGESTION ]=========================================================
@@ -129,7 +116,7 @@ export default class extends Controller {
       const day = d3.timeFormat("%Y-%m-%d")(new Date(row.time));
       return { ...row, day };
     });
-    this.firstRedraw();
+    this.redraw();
   }
 
   //=[ BRUSHING ]===============================================================
