@@ -1,6 +1,11 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 import { buildWordFilter } from "../utils";
+import { DatasetRow } from "./main_controller";
+
+type FacetRow = DatasetRow & {
+  day: string;
+};
 
 export default class extends Controller {
   static targets = ["fileInput", "sliderContainer"];
@@ -16,7 +21,7 @@ export default class extends Controller {
   width!: number;
   height!: number;
 
-  facet: { word: string; day: string }[] = [];
+  facet: FacetRow[] = [];
 
   connect(): void {
     this.margin = { top: 8, right: 16, bottom: 16, left: 32 };
@@ -44,17 +49,12 @@ export default class extends Controller {
   }
 
   reloadDataset({
-    detail: { data },
-  }: CustomEvent<{
-    data: {
-      timestamp: Date;
-      day: string;
-      latitude: number;
-      longitude: number;
-      word: string;
-    }[];
-  }>) {
-    this.facet = data.map(({ word, day }) => ({ word, day }));
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    this.facet = dataset.map((row) => ({
+      ...row,
+      day: d3.timeFormat("%Y-%m-%d")(new Date(row.time)),
+    }));
 
     const countByDay = d3.rollup(
       this.facet,
@@ -62,13 +62,14 @@ export default class extends Controller {
       (d) => d.day,
     );
 
-    // Convert the Map to an array of objects for easier processing
-    const histogramData = Array.from(countByDay, ([date, count]) => ({
-      date,
+    const histogramData = Array.from(countByDay, ([day, count]) => ({
+      day,
       count,
     }));
 
-    this.xScale.domain(d3.extent(data, (d) => d.timestamp) as [Date, Date]);
+    this.xScale.domain(
+      d3.extent(dataset, ({ time }) => time) as [number, number],
+    );
 
     // TODO: y changes when wordlist changes
     this.yScale.domain([0, d3.max(histogramData, (d) => d.count)] as [
@@ -92,7 +93,7 @@ export default class extends Controller {
       .attr("width", 2) // bandwidth?
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
-      .attr("x", (d) => this.xScale(new Date(d.date)));
+      .attr("x", (d) => this.xScale(new Date(d.day)));
 
     const brush = d3
       .brushX()
@@ -132,8 +133,8 @@ export default class extends Controller {
     );
 
     // Convert the Map to an array of objects for easier processing
-    const histogramData = Array.from(countByDay, ([date, count]) => ({
-      date,
+    const histogramData = Array.from(countByDay, ([day, count]) => ({
+      day,
       count,
     }));
 
@@ -153,7 +154,7 @@ export default class extends Controller {
       .attr("width", 2) // bandwidth?
       .attr("height", (d) => this.height - this.yScale(d.count))
       .attr("y", (d) => this.yScale(d.count))
-      .attr("x", (d) => this.xScale(new Date(d.date)));
+      .attr("x", (d) => this.xScale(new Date(d.day)));
 
     //this.dots.selectAll("circle").attr("visibility", (d: any) => {
     //  return wordFilter(d) ? "visible" : "hidden";

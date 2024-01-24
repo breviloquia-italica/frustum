@@ -10,14 +10,14 @@ export const buildWordFilter = function (wordlist: string[] | null) {
 };
 
 export const buildTimeFilter = function (timespan: [Date, Date] | null) {
-  let timeFilter: (d: { epoch: number }) => boolean;
+  let timeFilter: (d: { time: number }) => boolean;
   if (timespan === null) {
     timeFilter = () => true;
   } else {
     // NOTE: comparing millis is much faster
     const s = timespan[0].getTime();
     const t = timespan[1].getTime();
-    timeFilter = (d) => d.epoch >= s && d.epoch <= t;
+    timeFilter = (d) => d.time >= s && d.time <= t;
   }
   return timeFilter;
 };

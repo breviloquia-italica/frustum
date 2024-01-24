@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
+import { DatasetRow } from "./main_controller";
 
 export default class extends Controller {
   static targets = ["select"];
@@ -19,18 +20,10 @@ export default class extends Controller {
   disconnect() {}
 
   reloadDataset({
-    detail: { data },
-  }: CustomEvent<{
-    data: {
-      timestamp: Date;
-      day: string;
-      latitude: number;
-      longitude: number;
-      word: string;
-    }[];
-  }>) {
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
     const countByWord = d3.rollup(
-      data,
+      dataset,
       (v) => v.length,
       (d) => d.word,
     );

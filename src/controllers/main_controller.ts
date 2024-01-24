@@ -1,26 +1,24 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 
+const DATA_URL =
+  "https://gist.githubusercontent.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/frustum-demo-large.csv";
+
+export type DatasetRow = {
+  time: number;
+  latitude: number;
+  longitude: number;
+  word: string;
+};
+
 export default class extends Controller {
   static targets = ["fileInput"];
   declare readonly fileInputTarget: HTMLInputElement;
 
   connect(): void {
     setTimeout(() => {
-      d3.csv(
-        "https://gist.githubusercontent.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/frustum-demo-large.csv",
-        ({ timestamp, latitude, longitude, word }) => ({
-          timestamp: new Date(timestamp),
-          day: d3.timeFormat("%Y-%m-%d")(new Date(timestamp)),
-          latitude: +latitude,
-          longitude: +longitude,
-          word: word,
-          epoch: new Date(timestamp).getTime(),
-        }),
-      ).then((data) => {
-        this.dispatch("datasetChanged", {
-          detail: { data },
-        });
+      d3.csv(DATA_URL, this.convertCsvRow).then((dataset) => {
+        this.dispatch("datasetChanged", { detail: { dataset } });
       });
     }, 500);
   }
@@ -42,19 +40,26 @@ export default class extends Controller {
   }
 
   handleData(csv: string) {
-    const data = d3.csvParse(
-      csv,
-      ({ timestamp, latitude, longitude, word }) => ({
-        timestamp: new Date(timestamp),
-        day: d3.timeFormat("%Y-%m-%d")(new Date(timestamp)),
-        latitude: +latitude,
-        longitude: +longitude,
-        word: word,
-        epoch: new Date(timestamp).getTime(),
-      }),
-    );
-    this.dispatch("datasetChanged", {
-      detail: { data },
-    });
+    const dataset = d3.csvParse(csv, this.convertCsvRow);
+    this.dispatch("datasetChanged", { detail: { dataset } });
+  }
+
+  convertCsvRow({
+    timestamp,
+    latitude,
+    longitude,
+    word,
+  }: {
+    timestamp: string;
+    latitude: string;
+    longitude: string;
+    word: string;
+  }): DatasetRow {
+    return {
+      time: new Date(timestamp).getTime(),
+      latitude: +latitude,
+      longitude: +longitude,
+      word: word,
+    };
   }
 }

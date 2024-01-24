@@ -13,6 +13,12 @@ const MAP_URL = {
 import * as d3 from "d3";
 import { Hexbin, hexbin } from "d3-hexbin";
 import { buildTimeFilter, buildWordFilter } from "../utils";
+import { DatasetRow } from "./main_controller";
+
+type FacetRow = DatasetRow & {
+  x: number;
+  y: number;
+};
 
 export default class extends Controller {
   static targets = ["container"];
@@ -22,16 +28,7 @@ export default class extends Controller {
   hexbin!: Hexbin<[number, number]>;
   svg!: any;
 
-  dataset: {
-    timestamp: Date;
-    day: string;
-    latitude: number;
-    longitude: number;
-    word: string;
-    epoch: number;
-    x: number;
-    y: number;
-  }[] = [];
+  facet: FacetRow[] = [];
 
   timeFilter = buildTimeFilter(null);
   wordFilter = buildWordFilter(null);
@@ -92,22 +89,11 @@ export default class extends Controller {
   disconnect() {}
 
   reloadDataset({
-    detail: { data },
-  }: CustomEvent<{
-    data: {
-      timestamp: Date;
-      day: string;
-      latitude: number;
-      longitude: number;
-      word: string;
-      epoch: number;
-    }[];
-  }>) {
-    const bins: number[] = Array(10000).fill(0);
-    this.dataset = data.map((d) => {
-      const [x, y] = this.projection([d.longitude, d.latitude])!;
-      bins[Math.floor(x / 6) + Math.floor(y / 6) * 1000] += 1;
-      return { ...d, x, y };
+    detail: { dataset },
+  }: CustomEvent<{ dataset: DatasetRow[] }>) {
+    this.facet = dataset.map((row) => {
+      const [x, y] = this.projection([row.longitude, row.latitude])!;
+      return { ...row, x, y };
     });
     this.redrawheat();
   }
@@ -135,7 +121,7 @@ export default class extends Controller {
   }
 
   redrawheat() {
-    const dee = this.dataset
+    const dee = this.facet
       .filter(this.wordFilter)
       .filter(this.timeFilter)
       .map(({ x, y }) => [x, y]);
