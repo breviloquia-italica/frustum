@@ -77,13 +77,27 @@ export default class extends Controller {
 
     this.svg
       .select("#bars")
-      .selectAll("rect")
-      .data(this.histogramData)
-      .join("rect")
-      .attr("width", 2) // bandwidth?
-      .attr("height", (d) => this.height - this.yScale(d.count))
-      .attr("y", (d) => this.yScale(d.count))
-      .attr("x", (d) => this.xScale(new Date(d.day)));
+      .selectAll<SVGRectElement, { day: string; count: number }>("rect")
+      .data(this.histogramData, (d) => d.day)
+      .join(
+        (enter) => {
+          return enter
+            .append("rect")
+            .attr("width", 2) // TODO: compute band width
+            .attr("height", (d) => this.height - this.yScale(d.count))
+            .attr("y", (d) => this.yScale(d.count))
+            .attr("x", (d) => this.xScale(new Date(d.day)));
+        },
+        (update) => {
+          return update
+            .attr("height", (d) => this.height - this.yScale(d.count))
+            .attr("y", (d) => this.yScale(d.count))
+            .attr("x", (d) => this.xScale(new Date(d.day)));
+        },
+        (exit) => {
+          return exit.remove();
+        },
+      );
   }
 
   redrawXAxis() {

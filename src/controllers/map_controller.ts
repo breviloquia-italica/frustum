@@ -32,7 +32,7 @@ export default class extends Controller {
 
   projection!: d3.GeoProjection;
   hexbin!: Hexbin<[number, number]>;
-  svg!: any;
+  svg!: d3.Selection<SVGGElement, unknown, null, undefined>;
   extent!: [[number, number], [number, number]];
 
   facet: FacetRow[] = [];
@@ -70,7 +70,7 @@ export default class extends Controller {
   disconnect() {}
 
   redraw() {
-    const dee = this.facet
+    const dee: [number, number][] = this.facet
       .filter(this.wordFilter)
       .filter(this.timeFilter)
       .map(({ x, y }) => [x, y]);
@@ -82,35 +82,23 @@ export default class extends Controller {
 
     this.svg
       .select("#hexbins")
-      .selectAll("path")
-      .data(this.hexbin(dee))
+      .selectAll<SVGPathElement, Hexbin<[number, number]>[]>("path")
+      .data(this.hexbin(dee)) // TODO: unique indexing of bins so we can gray out empty ones
       .join(
-        (enter: any) => {
+        (enter) => {
           return enter
             .append("path")
             .attr("d", this.hexbin.hexagon())
-            .attr("transform", function (d: any) {
-              return "translate(" + d.x + "," + d.y + ")";
-            })
-            .attr("fill", function (d: any) {
-              return color(d.length);
-            });
+            .attr("transform", ({ x, y }) => `translate(${x},${y})`)
+            .attr("fill", (d) => color(d.length));
         },
-        (update: any) => {
+        (update) => {
           return update
-            .attr("fill", function (d: any) {
-              return color(d.length);
-            })
-            .attr("transform", function (d: any) {
-              return "translate(" + d.x + "," + d.y + ")";
-            });
+            .attr("transform", ({ x, y }) => `translate(${x},${y})`)
+            .attr("fill", (d) => color(d.length));
         },
-        (exit: any) => {
+        (exit) => {
           return exit.remove();
-          // FIXME: this doesn't quite work, as hexbins are not generated in a linear fashion
-          return exit.attr("fill", function (d: any) {
-            return "#BBB";
-          });
         },
       );
   }
