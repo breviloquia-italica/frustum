@@ -48,12 +48,17 @@ map:filterChanged->timeline#updateFilter
         <option value="tweet_id">Aggregate counting unique tweets</option>
         <option value="user_id">Aggregate counting unique users</option>
       </select>
-      <div class="text-sm">
-        This is <code>frustum</code>.
+      <div class="text-xs">
+        <!-- This is <code>frustum</code>. -->
         Click and drag on any view to facet data.
-        You can upload a CSV file with these columns: <code>timestamp</code> (ISO8601 string), <code>latitude</code>
-        (number),
-        <code>longitude</code> (number), and <code>word</code> (string).
+        Select an aggregation criterion above.
+        Load CSV files with these columns:
+        <code>timestamp</code> (ISO8601 string),
+        <code>user_id</code> (anonymized UUID),
+        <code>tweet_id</code> (number),
+        <code>latitude</code> (number),
+        <code>longitude</code> (number), and
+        <code>word</code> (string).
       </div>
       <!-- <input class="
         block w-full
