@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
 
 const DATA_URL =
-  "https://gist.githubusercontent.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/frustum-demo-large.csv";
+  "https://gist.githubusercontent.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/frustum-demo-full.csv";
 
 export type DatasetRow = {
   time: number;
