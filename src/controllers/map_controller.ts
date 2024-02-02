@@ -11,7 +11,7 @@ const MAP_URL = {
 };
 
 import * as d3 from "d3";
-import { Hexbin, hexbin } from "d3-hexbin";
+import { Hexbin, HexbinBin, hexbin } from "d3-hexbin";
 import {
   buildLandFilter,
   FilterChangeEvent,
@@ -19,13 +19,15 @@ import {
   TimeFilter,
   WordFilter,
 } from "../filter";
-import { DatasetRow } from "./main_controller";
+import { AggregationKey, DatasetRow } from "./main_controller";
 import { ramp } from "../utils";
 
 type FacetRow = DatasetRow & {
   x: number;
   y: number;
 };
+
+type AggDatum = { [key in Exclude<AggregationKey, null>]: unknown };
 
 export default class extends Controller {
   static targets = ["container"];
@@ -73,11 +75,30 @@ export default class extends Controller {
   disconnect() {}
 
   redraw() {
-    const dee: [number, number][] = this.facet
+    const dataFiltered = this.facet
       .filter(this.wordFilter)
-      .filter(this.timeFilter)
-      .map(({ x, y }) => [x, y]);
-    const mx = Math.max(...this.hexbin(dee).map((h) => h.length), 0);
+      .filter(this.timeFilter);
+
+    const dataBinned = this.hexbin(
+      dataFiltered.map(({ x, y, tweet_id, user_id }) => {
+        const datum = [x, y] as [number, number] & AggDatum;
+        datum.user_id = user_id;
+        datum.tweet_id = tweet_id;
+        return datum;
+      }),
+    ) as (HexbinBin<[number, number] & AggDatum> & { count: number })[];
+
+    const key = this.aggregationKey;
+    let counter: (bin: HexbinBin<[number, number] & AggDatum>) => number;
+    if (key === null) {
+      counter = (bin) => bin.length;
+    } else {
+      counter = (bin) => new Set(bin.map((p) => p[key])).size;
+    }
+
+    dataBinned.forEach((bin) => (bin.count = counter(bin)));
+
+    const mx = Math.max(...dataBinned.map((h) => h.count), 0);
     const color = (t: number) => d3.interpolateCool(t / mx); // TODO: maybe Cividis?
 
     this.cScale.domain([mx, 0] as [number, number]);
@@ -86,19 +107,19 @@ export default class extends Controller {
     this.svg
       .select("#hexbins")
       .selectAll<SVGPathElement, Hexbin<[number, number]>[]>("path")
-      .data(this.hexbin(dee)) // TODO: unique indexing of bins so we can gray out empty ones
+      .data(dataBinned) // TODO: unique indexing of bins so we can gray out empty ones
       .join(
         (enter) => {
           return enter
             .append("path")
             .attr("d", this.hexbin.hexagon())
             .attr("transform", ({ x, y }) => `translate(${x},${y})`)
-            .attr("fill", (d) => color(d.length));
+            .attr("fill", (d) => color(d.count));
         },
         (update) => {
           return update
             .attr("transform", ({ x, y }) => `translate(${x},${y})`)
-            .attr("fill", (d) => color(d.length));
+            .attr("fill", (d) => color(d.count));
         },
         (exit) => {
           return exit.remove();
@@ -190,5 +211,18 @@ export default class extends Controller {
     this.dispatch("filterChanged", {
       detail: { landFilter: this.landFilter },
     });
+  }
+
+  //=[ AGGREGATION ]============================================================
+
+  aggregationKey: AggregationKey = null;
+
+  updateCounter({
+    detail: { aggregationKey },
+  }: CustomEvent<{
+    aggregationKey: AggregationKey;
+  }>) {
+    this.aggregationKey = aggregationKey;
+    this.redraw();
   }
 }

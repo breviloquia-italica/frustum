@@ -14,6 +14,9 @@
 main:datasetChanged->lexicon#updateDataset
 main:datasetChanged->timeline#updateDataset
 main:datasetChanged->map#updateDataset
+main:counterChanged->lexicon#updateCounter
+main:counterChanged->timeline#updateCounter
+main:counterChanged->map#updateCounter
 lexicon:filterChanged->timeline#updateFilter
 lexicon:filterChanged->map#updateFilter
 timeline:filterChanged->lexicon#updateFilter
@@ -34,6 +37,17 @@ map:filterChanged->timeline#updateFilter
         file:mr-4 file:py-2 file:px-4 file:rounded-md
         file:border-0 file:text-sm file:font-semibold
       " type="file" data-action="change->main#changeDataset" />
+      <select class="
+        block w-full text-sm leading-tight font-sans font-semibold
+        border-0 p-2 rounded-md
+      bg-slate-50 hover:bg-slate-100 active:bg-slate-300
+      " data-action="
+        change->main#changeCounter
+      ">
+        <option value="">Aggregate counting occurrences</option>
+        <option value="tweet_id">Aggregate counting unique tweets</option>
+        <option value="user_id">Aggregate counting unique users</option>
+      </select>
       <div class="text-sm">
         This is <code>frustum</code>.
         Click and drag on any view to facet data.

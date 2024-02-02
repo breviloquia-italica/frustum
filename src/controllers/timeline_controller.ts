@@ -7,7 +7,7 @@ import {
   TimeFilter,
   WordFilter,
 } from "../filter";
-import { DatasetRow } from "./main_controller";
+import { AggregationKey, DatasetRow } from "./main_controller";
 
 type FacetRow = DatasetRow & {
   day: string;
@@ -56,11 +56,21 @@ export default class extends Controller {
   }
 
   buildHistogram() {
+    const dataFiltered = this.facet
+      .filter((d) => this.wordFilter(d))
+      .filter((d) => this.landFilter(d));
+
+    const key = this.aggregationKey;
+    let counter: (bin: FacetRow[]) => number;
+    if (key === null) {
+      counter = (bin) => bin.length;
+    } else {
+      counter = (bin) => new Set(bin.map((p) => p[key])).size;
+    }
+
     const countByDay = d3.rollup(
-      this.facet
-        .filter((d) => this.wordFilter(d))
-        .filter((d) => this.landFilter(d)),
-      (v) => v.length,
+      dataFiltered,
+      (v) => counter(v),
       (d) => d.day,
     );
 
@@ -174,5 +184,18 @@ export default class extends Controller {
     this.dispatch("filterChanged", {
       detail: { timeFilter: this.timeFilter },
     });
+  }
+
+  //=[ AGGREGATION ]============================================================
+
+  aggregationKey: AggregationKey = null;
+
+  updateCounter({
+    detail: { aggregationKey },
+  }: CustomEvent<{
+    aggregationKey: AggregationKey;
+  }>) {
+    this.aggregationKey = aggregationKey;
+    this.redraw();
   }
 }

@@ -5,11 +5,15 @@ const DATA_URL =
   "https://gist.githubusercontent.com/paolobrasolin/ca6595469258bca83937edd4f5770f5d/raw/frustum-demo-full.csv";
 
 export type DatasetRow = {
+  tweet_id: number;
+  user_id: string;
   time: number;
   latitude: number;
   longitude: number;
   word: string;
 };
+
+export type AggregationKey = null | "tweet_id" | "user_id";
 
 export default class extends Controller {
   static targets = ["fileInput"];
@@ -39,23 +43,37 @@ export default class extends Controller {
     }
   }
 
+  async changeCounter(event: Event) {
+    const input = event.target as HTMLSelectElement;
+    const aggregationKey = (input.value ? input.value : null) as AggregationKey;
+    this.dispatch("counterChanged", {
+      detail: { aggregationKey },
+    });
+  }
+
   handleData(csv: string) {
     const dataset = d3.csvParse(csv, this.convertCsvRow);
     this.dispatch("datasetChanged", { detail: { dataset } });
   }
 
   convertCsvRow({
+    tweet_id,
+    user_id,
     timestamp,
     latitude,
     longitude,
     word,
   }: {
+    tweet_id: string;
+    user_id: string;
     timestamp: string;
     latitude: string;
     longitude: string;
     word: string;
   }): DatasetRow {
     return {
+      tweet_id: +tweet_id,
+      user_id: user_id, // BigInt("0x" + user_id.replace(/-/g, "")),
       time: new Date(timestamp).getTime(),
       latitude: +latitude,
       longitude: +longitude,

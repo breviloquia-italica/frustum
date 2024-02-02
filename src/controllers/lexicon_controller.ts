@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import * as d3 from "d3";
-import { DatasetRow } from "./main_controller";
+import { AggregationKey, DatasetRow } from "./main_controller";
 import {
   buildWordFilter,
   FilterChangeEvent,
@@ -22,11 +22,21 @@ export default class extends Controller {
   disconnect() {}
 
   redraw() {
+    const filteredData = this.facet
+      .filter((d) => this.timeFilter(d))
+      .filter((d) => this.landFilter(d));
+
+    const key = this.aggregationKey;
+    let counter: (bin: DatasetRow[]) => number;
+    if (key === null) {
+      counter = (bin) => bin.length;
+    } else {
+      counter = (bin) => new Set(bin.map((p) => p[key])).size;
+    }
+
     const countByWord = d3.rollup(
-      this.facet
-        .filter((d) => this.timeFilter(d))
-        .filter((d) => this.landFilter(d)),
-      (v) => v.length,
+      filteredData,
+      (v) => counter(v),
       (d) => d.word,
     );
 
@@ -97,5 +107,18 @@ export default class extends Controller {
     this.dispatch("filterChanged", {
       detail: { wordFilter: this.wordFilter },
     });
+  }
+
+  //=[ AGGREGATION ]============================================================
+
+  aggregationKey: AggregationKey = null;
+
+  updateCounter({
+    detail: { aggregationKey },
+  }: CustomEvent<{
+    aggregationKey: AggregationKey;
+  }>) {
+    this.aggregationKey = aggregationKey;
+    this.redraw();
   }
 }
