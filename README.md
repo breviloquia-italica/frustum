@@ -1,6 +1,6 @@
 # Breviloquia Italica: `frustum` visualization tool
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.TODO.svg)](https://doi.org/10.5281/zenodo.TODO)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11241357.svg)](https://doi.org/10.5281/zenodo.11241357)
 ![GitHub License](https://img.shields.io/github/license/breviloquia-italica/frustum)
 
 
