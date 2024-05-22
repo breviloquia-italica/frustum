@@ -1,0 +1,15 @@
+{
+  "creators": [
+    {
+      "name": "Brasolin, Paolo",
+      "orcid": "0000-0003-2471-7797"
+    }
+  ],
+  "license": {
+    "id": "MIT"
+  },
+  "publication_date": "2024-05-22",
+  "title": "Breviloquia Italica: frustum visualization tool",
+  "upload_type": "software",
+  "version": "0.1.0"
+}
