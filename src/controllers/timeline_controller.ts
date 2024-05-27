@@ -131,7 +131,8 @@ export default class extends Controller {
     this.yScale.domain(bounds as [number, number]);
 
     this.svg.select("#yAxis").remove();
-    this.svg.append("g").attr("id", "yAxis").call(d3.axisLeft(this.yScale));
+    this.svg.insert("g", ":first-child").attr("id", "yAxis").call(d3.axisLeft(this.yScale).tickSize(-this.width)).selectAll('.tick line')
+    .attr("stroke", "#ddd");
   }
 
   //=[ DATA INGESTION ]=========================================================
