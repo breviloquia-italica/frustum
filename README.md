@@ -34,9 +34,9 @@ Once the data is loaded, you are presented with three views:
 * an histogram plot over a timeline where bins are days (you can filter a period by dragging to draw a range).
 The filter of each view affects the other two views.
 
-You can pick which aggregate statistic is presented by the views by using the dropdown menu and choosing between the following.
+You can pick which aggregate statistic to view by using the dropdown menu and choosing between the following:
 * `Aggregate counting occurrences`: the number of rows in the data containing a word.
-* `Aggregate counting unique tweets`: the numbers of unique tweets containing a word (the `tweet_id` column is the index).
+* `Aggregate counting unique tweets`: the number of unique tweets containing a word (the `tweet_id` column is the index).
 * `Aggregate counting unique users`: the number of unique users of a word (the `user_id` column is the index).
 The numbers in the views will be the total (in the word list), the count per hex (in the map), and the count per day (in the histogram).
 
